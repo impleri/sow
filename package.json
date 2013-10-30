@@ -1,0 +1,18 @@
+{
+  "name": "Sow",
+  "description": "A command-line script for accessing a Harvest account.",
+  "version": "0.0.1",
+  "author": "Christopher Roussel",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": "~0.8"
+  },
+  "dependencies": {
+    "harvestapp": "0.1.0-6"
+  },
+  "devDependencies": {}
+}
