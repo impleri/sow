@@ -1,25 +1,39 @@
 {
-  "name": "Reap",
-  "description": "A command-line script for accessing a Harvest account.",
-  "version": "0.0.1",
-  "author": "Christopher Roussel",
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "engines": {
-    "node": "~0.8"
-  },
-  "scripts": {
-    "start": "brunch watch --server",
-    "test": "brunch test"
-  },
-  "dependencies": {
-    "coffee-script-brunch": "~1.7.2",
-    "javascript-brunch": "~1.7",
-    "uglify-js-brunch": "~1.7",
-    "harvestapp": "0.1.0-6"
-  },
-  "devDependencies": {}
+    "name": "sow",
+    "description": "Harvest CLI tool using node.js.",
+    "keywords": [
+        "harvest",
+        "harvestapp",
+        "cli",
+        "time"
+    ],
+    "author": {
+        "name": "Christopher Roussel",
+        "email": "christopher@impleri.net"
+    },
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com/impleri/sow.git"
+    },
+    "homepage": "https://github.com/impleri/sow",
+    "engines": {
+        "node": "~0.8"
+    },
+    "bin": {
+        "sow": "./build/sow.js"
+    },
+    "scripts": {
+        "start": "brunch watch --server",
+        "test": "brunch test"
+    },
+    "dependencies": {
+        "coffee-script-brunch": "~1.7.2",
+        "javascript-brunch": "~1.7",
+        "uglify-js-brunch": "~1.7",
+        "harvestapp": "0.1.0-6"
+    },
+    "devDependencies": {},
+    "readmeFilename": "readme.md",
+    "readme": "# Sow\n\nYou can only reap what you sow in any harvest."
 }

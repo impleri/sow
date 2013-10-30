@@ -12,7 +12,7 @@ exports.config =
   files:
     javascripts:
       joinTo:
-        'reap.js': /^src/
+        'sow.js': /^src/
         'test.js': /^test/
       order:
         before: [
