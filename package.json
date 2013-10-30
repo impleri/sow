@@ -1,0 +1,25 @@
+{
+  "name": "Reap",
+  "description": "A command-line script for accessing a Harvest account.",
+  "version": "0.0.1",
+  "author": "Christopher Roussel",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": "~0.8"
+  },
+  "scripts": {
+    "start": "brunch watch --server",
+    "test": "brunch test"
+  },
+  "dependencies": {
+    "coffee-script-brunch": "~1.7.2",
+    "javascript-brunch": "~1.7",
+    "uglify-js-brunch": "~1.7",
+    "harvestapp": "0.1.0-6"
+  },
+  "devDependencies": {}
+}
