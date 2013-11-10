@@ -1,6 +1,8 @@
 {
     "name": "sow",
     "description": "Harvest CLI tool using node.js.",
+    "version": "0.0.1",
+    "homepage": "https://github.com/impleri/sow",
     "keywords": [
         "harvest",
         "harvestapp",
@@ -11,29 +13,42 @@
         "name": "Christopher Roussel",
         "email": "christopher@impleri.net"
     },
-    "version": "0.0.1",
     "repository": {
         "type": "git",
         "url": "git@github.com/impleri/sow.git"
     },
-    "homepage": "https://github.com/impleri/sow",
-    "engines": {
-        "node": "~0.8"
+    "bugs": {
+        "url": "https://github.com/impleri/sow/issues"
     },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/impleri/sow/raw/master/license"
+        }
+    ],
+    "preferGlobal": true,
+    "main": "./build/index",
     "bin": {
-        "sow": "./build/sow.js"
+        "sow": "./bin/sow.js"
     },
     "scripts": {
-        "start": "brunch watch --server",
-        "test": "brunch test"
+        "prepublish": "node setup.js prepublish",
+        "postpublish": "node setup.js postpublish",
+        "test": "node setup.js test"
     },
     "dependencies": {
-        "coffee-script-brunch": "~1.7.2",
-        "javascript-brunch": "~1.7",
-        "uglify-js-brunch": "~1.7",
-        "harvestapp": "0.1.0-6"
+        "coffee-script": "~1.6",
+        "commander": "~2.0.0",
+        "oauth": "~0.9",
+        "harvest": "~0.0",
+        "loggy": "~0.2.0"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "mocha": "~1.14",
+        "chai": "~1.8",
+        "debug": "~0.7",
+        "rewire": "~1.1"
+    },
     "readmeFilename": "readme.md",
-    "readme": "# Sow\n\nYou can only reap what you sow in any harvest."
+    "readme": "# Sow\n\nYou can only reap what you sow in any Harvest."
 }
