@@ -1,37 +1,77 @@
+fs = require "fs"
+logger = require "loggy"
 
-String::ucfirst = ->
-    this.charAt(0).toUpperCase() + this.slice(1)
+configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
+configParent = configRoot + "/.config"
+configPath = configParent + "/sow"
 
 
 ###
- * Config Path
+ * Get File Path
  *
- * Gets the (hopefully correct) path to the current user's $HOME directory.
- * @return string The absolute path to $HOME.
+ * Builds full path for a config file.
+ * @param string The file's basename for which to build.
+ * @return string Complete path to the file.
 ###
-configPath = ->
-    process.env.HOME or process.env.HOMEPATH or process.env.USERPROFILE
+getFilePath = (file) ->
+    configPath + "/" + file + ".json"
+
+
+###
+ * Create Config Path
+ *
+ * Ensures the directories exist for the config path.
+###
+createConfigPath = ->
+    fs.exists configParent, (exists) ->
+        if !exists
+            fs.mkdir configParent, "755"
+
+        fs.exists configPath, (exists) ->
+            if !exists
+                fs.mkdir configPath, "755"
+
 
 ###
  * Save File
  *
  * Wrapper to Node's FS module to save a file, emitting a message on failure.
+ * @param  string file Base name of file to save.
+ * @param  mixed  data Data to save.
+ * @return boolean     True on success, false otherwise.
+###
+exports.save = saveFile = (file, data) ->
+    saveFile = getFilePath file
+    saveData = JSON.stringify data
+
+    fs.writeFile saveFile, saveData, (err) ->
+        if err
+            logger.warn "There has been an error saving the " + file + " data."
+            logger.log err.message
+            false
+        else
+            logger.success file + " saved successfully to " + getFilePath file
+            true
+
+
+###
+ * Read File
+ *
+ * Wrapper to Node's require to read a JSON file, parsing it.
  * @param  string file Name of file to save. Formatted to $HOME/.sow.$FILE.json.
  * @param  object|array data Data to save
  * @return boolean      True on success, false otherwise.
 ###
-saveFile = (file, data) ->
-    saveFile = this.configPath + "/.sow." + file + ".json"
-    saveData = JSON.stringify data
+exports.read = readFile = (file) ->
+    readFile = getFilePath file
 
-    fs.writeFile file, saveData, (err) ->
-        if err
-            console.log "There has been an error saving the " + file + " data."
-            console.log err.message
-            false
-        else
-            console.log file.ucfirst + " saved successfully."
+    try
+        data = require readFile
+    catch err
+        console.log err.message
+        data = {}
 
-    true
+    return data
 
-exports.save = saveFile
+# Run and export things
+createConfigPath()
