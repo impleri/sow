@@ -5,7 +5,6 @@ configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
 configParent = configRoot + "/.config"
 configPath = configParent + "/sow"
 
-
 ###
  * Get File Path
  *
@@ -43,14 +42,13 @@ createConfigPath = ->
 exports.save = saveFile = (file, data) ->
     saveFile = getFilePath file
     saveData = JSON.stringify data
-
     fs.writeFile saveFile, saveData, (err) ->
         if err
-            logger.warn "There has been an error saving the " + file + " data."
+            logger.warn "There has been an error writing " + getFilePath file
             logger.log err.message
             false
         else
-            logger.success file + " saved successfully to " + getFilePath file
+            logger.success "Data saved to " + getFilePath file
             true
 
 
@@ -68,7 +66,7 @@ exports.read = readFile = (file) ->
     try
         data = require readFile
     catch err
-        console.log err.message
+        logger.warn err.message
         data = {}
 
     return data
