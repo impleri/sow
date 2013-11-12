@@ -63,13 +63,12 @@ var compileCoffee = function () {
             if (!exists) {
                 fs.mkdirSync("./bin");
             }
+            concat({
+                src: ["src/hashbang.txt", "build/sow.js"],
+                dest: "bin/sow"
+            });
+            fs.chmodSync("bin/sow", "755");
         });
-
-        concat({
-            src: ["src/hashbang.txt", "build/sow.js"],
-            dest: "bin/sow"
-        });
-        fs.chmod("bin/sow", "755");
     });
 };
 
