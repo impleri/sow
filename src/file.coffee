@@ -42,15 +42,15 @@ createConfigPath = ->
 exports.save = saveFile = (file, data) ->
     saveFile = getFilePath file
     saveData = JSON.stringify data
+
     fs.writeFile saveFile, saveData, (err) ->
         if err
             logger.warn "There has been an error writing " + getFilePath file
             logger.log err.message
-            false
         else
             logger.success "Data saved to " + getFilePath file
-            true
 
+    (fs.existsSync file)
 
 ###
  * Read File
