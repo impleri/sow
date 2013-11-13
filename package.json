@@ -40,7 +40,7 @@
         "coffee-script": "~1.6",
         "commander": "~2.0.0",
         "oauth": "~0.9",
-        "harvest": "~0.0",
+        "harvest": "impleri/node-harvest",
         "loggy": "~0.2.0"
     },
     "devDependencies": {

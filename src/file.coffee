@@ -1,3 +1,5 @@
+# File Helper
+
 fs = require "fs"
 logger = require "loggy"
 
@@ -73,3 +75,6 @@ exports.read = readFile = (file) ->
 
 # Run and export things
 createConfigPath()
+
+# Define files
+exports.files = {config: "config", aliases: "alias", history: "history"}

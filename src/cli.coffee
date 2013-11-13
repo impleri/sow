@@ -1,20 +1,28 @@
+# Actual CLI interface (Commander)
+
 'use strict'
 
 cmd = require "commander"
-# commands = require './'
+commands = require './'
 
 cmd.version(require("../package.json").version)
 
 cmd.command('client-alias [client] [alias]')
-  .description('Create an alias for a Harvest client ID. Short-cut: ca')
-  .action ->
-    commands.alias "c", program.args[0], program.args[1]
+    .description('Create an alias for a Harvest client ID. Short-cut: ca')
+    .action ->
+        commands.alias "c", cmd.args[0], cmd.args[1]
 
 cmd.command('project-alias [project] [alias]')
-  .description('Create an alias for a Harvest project ID. Short-cut: pa')
-  .action ->
-    commands.alias "p", program.args[0], program.args[1]
+    .description('Create an alias for a Harvest project ID. Short-cut: pa')
+    .action ->
+        commands.alias "p", cmd.args[0], cmd.args[1]
 
+cmd.command('summary [date]')
+    .description('Show logged time for a date formatted as YYYY-MM-DD. Short-cut: s')
+    .action ->
+        commands.summary cmd.args[0]
+
+###
 program
   .command('build')
   .description('Build a brunch project. Short-cut: b')
@@ -35,44 +43,19 @@ program
   .option('-c, --config [path]', '[DEPRECATED] path to config files')
   .option('-o, --optimize', '[DEPRECATED] same as `--env production`')
   .action(commands.watch)
+###
 
-# The function would be executed every time user run `bin/brunch`.
+# The function would be executed every time user run `bin/sow`.
 exports.run = ->
-  args = process.argv.slice()
-  command = args[2]
+    args = process.argv.slice()
+    command = args[2]
 
-  if command in ['g', 'd', 'generate', 'destroy']
-    console.error '''`brunch generate / destroy` command was removed.
+    fullCommand = switch command
+        when 'ca' then 'client-alias'
+        when 'pa' then 'project-alias'
+        when 's' then 'summary'
+        else command
 
-    Use scaffolt (https://github.com/paulmillr/scaffolt)
-    successor or similar:
-        npm install -g scaffolt
-        scaffolt <type> <name> [options]
-        scaffolt <type> <name> [options] --revert
-    '''
-  if command in ['t', 'test']
-    console.error '''`brunch test` command was removed.
-
-    Use mocha-phantomjs (http://metaskills.net/mocha-phantomjs/)
-    successor or similar:
-        npm install -g mocha-phantomjs
-        mocha-phantomjs [options] <your-html-file-or-url>
-    '''
-  if command in ['n', 'new'] and '--skeleton' in args
-    return console.error '''`--skeleton` option has been removed from `brunch new`.
-
-    The syntax is now simply:
-
-    brunch new <path-or-URI> [optional-output-dir]
-    brunch new github:brunch/dead-simple
-    brunch new gh:paulmillr/brunch-with-chaplin
-    '''
-
-  fullCommand = switch command
-    when 'n' then 'new'
-    when 'b' then 'build'
-    when 'w' then 'watch'
-    else command
-  args[2] = fullCommand if fullCommand?
-  program.parse args
-  program.help() unless fullCommand?
+    args[2] = fullCommand if fullCommand?
+    cmd.parse args
+    cmd.help() unless fullCommand?

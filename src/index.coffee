@@ -1,12 +1,8 @@
 'use strict'
 
-fs = require "fs"
-logger = require "loggy"
-harvest = require "./harvest"
-sow = require "./sow"
+sow = require "./harvest"
 
 module.exports = {
-  alias: sow.alias
-  build: watch.bind(null, false)
-  watch: watch.bind(null, true)
+  alias: sow.alias,
+  summary: sow.summary
 }
