@@ -2,13 +2,13 @@
 'use strict'
 
 
-summary = require "./harvest_summary"
+summary = require "./summary"
 exports.summary = summary.day
 exports.week = summary.week
 
-exports.alias = require "./harvest_alias"
+exports.alias = require "./alias"
 
-# timer = require "./harvest_timer"
+# timer = require "./timer"
 # exports.start = timer.start
 # exports.pause = timer.pause
 # exports.resume = timer.resume

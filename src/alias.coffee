@@ -1,6 +1,6 @@
 # Main logic for Harvest
 
-harvest = require "./harvest_wrapper"
+harvest = require "./harvest"
 
 logger = require "loggy"
 colors = require "colors"

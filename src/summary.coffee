@@ -1,6 +1,6 @@
 # Main logic for Harvest
 
-harvest = require "./harvest_wrapper"
+harvest = require "./harvest"
 time = harvest.TimeTracking
 
 logger = require "loggy"
