@@ -1,7 +1,7 @@
 {
     "name": "sow",
     "description": "Harvest CLI tool using node.js.",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "homepage": "https://github.com/impleri/sow",
     "keywords": [
         "harvest",
@@ -41,7 +41,10 @@
         "commander": "~2.0.0",
         "oauth": "~0.9",
         "harvest": "impleri/node-harvest",
-        "loggy": "~0.2.0"
+        "loggy": "~0.2.0",
+        "archy": "~0.0",
+        "colors": "~0.6",
+        "prompt": "~0.2.11"
     },
     "devDependencies": {
         "mocha": "~1.14",
