@@ -13,15 +13,20 @@ cmd.command('alias <alias> <resource>')
     .action ->
         commands.alias cmd.args[0], cmd.args[1], cmd.type
 
-cmd.command('summary [date]')
-    .description('Show logged time for a date (default = today). Shortcut: sum')
+cmd.command('day [date]')
+    .description('Show logged time for a date (default = today). Shortcut: d')
     .action ->
-        commands.summary cmd.args[0]
+        commands.day cmd.args[0]
 
 cmd.command('week [date]')
     .description('Show logged time for the week of a date (default = today). Shortcut: w')
     .action ->
         commands.week cmd.args[0]
+
+cmd.command('range <fromDate> <toDate>')
+    .description('Show logged time for a date range. Shortcut: r')
+    .action ->
+        commands.range cmd.args[0], cmd.args[1]
 
 
 # The function is executed every time user runs `bin/sow`
@@ -32,7 +37,8 @@ exports.run = ->
     # Replace shortcuts
     fullCommand = switch command
         when 'a' then 'alias'
-        when 'sum' then 'summary'
+        when 'd' then 'day'
+        when 'r' then 'range'
         when 'w' then 'week'
         else command
 

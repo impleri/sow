@@ -3,7 +3,8 @@
 
 
 summary = require "./summary"
-exports.summary = summary.day
+exports.day = summary.day
+exports.range = summary.range
 exports.week = summary.week
 
 exports.alias = require "./alias"
