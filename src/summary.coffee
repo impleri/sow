@@ -1,13 +1,14 @@
 # Main logic for summarising entries
 
 harvest = require "./harvest"
-time = harvest.TimeTracking
-
+file = require "./file"
 logger = require "loggy"
 colors = require "colors"
 chrono = require "chrono-node"
 archy = require "archy"
 
+time = harvest.TimeTracking
+config = file.read file.files.config
 totalHours = 0.00
 counter = maxCount = 0
 debug = false
@@ -169,9 +170,10 @@ exports.day = dayDate = (date = false) ->
 # Show the logged time for an entire week, defaulting to this week
 exports.week = dayWeek = (date = false) ->
     calledMethod = "week"
-    d = getDate date
-    first = new Date d.setDate d.getDate() - d.getDay() + 1
-    last = new Date d.setDate d.getDate() - d.getDay() + 7
+    startOfWeek = config.startOfWeek || "Monday"
+    first = getDate "last " + startOfWeek
+    last = new Date first.getTime()
+    last = new Date last.setDate last.getDate() + 6
 
     if debug
         logger.log "Start:", first

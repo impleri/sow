@@ -16,6 +16,11 @@ Sow focuses on time entry and history. Its aim is to make it easy to do CRUD-lik
 actions on time tracking, and produce some very simple reports all from the CLI.
 Most commands have a shortcut as well to make usage as fast as possible.
 
+For all date fields, you can use any normal date formats parsed by JavaScript's
+Date class. Additionally, you can use any kind of natural language (e.g.
+"yesterday", "last Tuesday"). Any natural language date expressions which contain
+spaces must be enclosed in quotation marks.
+
 
 ### alias [a]
 
@@ -29,51 +34,68 @@ which you can choose the correct client.
 
 Parameters: [--type = project] alias resource
 
-### start [s]
 
-Start a new timer, optionally adding time to it.
+### Time Entry
 
-Parameters: project(.| )task [time] [comment]
+* log [l]
 
+    Create a new inactive timer.
 
-### pause [p]
+    Parameters: project(.| )task time [comment]
 
-Pause the active timer.
+* start [s]
 
+    Create a new active timer, optionally adding time to it.
 
-### resume [r]
+    Parameters: project(.| )task [time] [comment]
 
-Continue an existing timer.
+* pause [p]
 
-Parameters: project(.| )task [comment]
+    Pause the active timer.
 
+* resume [r]
 
-### log [l]
+    Continue an existing timer.
 
-Create a new stopped timer.
+    Parameters: project(.| )task [comment]
 
-Parameters: project(.| )task time [comment]
+* note [n]
 
+    Updates the note for the currently running timer.
 
-### summary [sum]
-
-Summary provides, as may be expected, a summary of a day's entries. A specific day
-may be passed as a parameter in a format readable by Date.parse and without any
-timezone handling. If a date is not provided, sow will default to today.
-
-Parameters: [date]
-
-    $ sow summary            // Today's entries
-    $ sow s 2012-12-01 // 01 Dec 2012
-    $ sow summary 11/11/2011 // 11 Nov 2011
-    $ sow s 7.11.2013  // 11 July 2013
+    Parameters: note
 
 
-### week [w]
+### Time Reporting
 
-Provides a summary of all entries within a set week. A date may be passed as a
-parameter in a format readable by Date.parse. If a date is provided, the result
-will be for the week (Mon - Sun) in which that date exists.
+*  day [d]
 
-Parameters: [date]
+    Summary provides, as may be expected, a summary of a day's entries. If a date
+    is not provided, sow will default to today.
 
+    Parameters: [date]
+
+        $ sow day            // Today's entries
+        $ sow d 2012-12-01   // 01 Dec 2012
+        $ sow day 11/11/2011 // 11 Nov 2011
+        $ sow d 7.11.2013    // 11 July 2013
+
+* week [w]
+
+    Provides a summary of all entries within a set week. The default date is
+    today. The result will be for the week in which the provided date exists.
+
+    Parameters: [date]
+
+* range
+
+    Provides a summary of all entries within a range of dates.
+
+    Parameters: fromDate toDate
+
+
+## Configuration
+
+### startOfWeek
+
+Defines the day on which the week starts. Default is Monday.

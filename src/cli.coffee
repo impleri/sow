@@ -24,7 +24,7 @@ cmd.command('week [date]')
         commands.week cmd.args[0]
 
 cmd.command('range <fromDate> <toDate>')
-    .description('Show logged time for a date range. Shortcut: r')
+    .description('Show logged time for a date range.')
     .action ->
         commands.range cmd.args[0], cmd.args[1]
 
@@ -38,7 +38,6 @@ exports.run = ->
     fullCommand = switch command
         when 'a' then 'alias'
         when 'd' then 'day'
-        when 'r' then 'range'
         when 'w' then 'week'
         else command
 
