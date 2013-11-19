@@ -1,4 +1,5 @@
 # Common logic for Harvest
+'use strict'
 
 harvestClass = require "harvest"
 file = require "./file"

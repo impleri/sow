@@ -1,4 +1,5 @@
 # Executable file
+'use strict'
 
 path = require 'path'
 fs = require 'fs'

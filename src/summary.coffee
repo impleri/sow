@@ -1,17 +1,15 @@
 # Main logic for summarising entries
+'use strict'
 
-harvest = require "./harvest"
-file = require "./file"
+time = require("./harvest").TimeTracking
+config = require("./file").config()
 logger = require "loggy"
 colors = require "colors"
 chrono = require "chrono-node"
 archy = require "archy"
 
-time = harvest.TimeTracking
-config = file.read file.files.config
 totalHours = 0.00
 counter = maxCount = 0
-debug = false
 callsComplete = false
 calledMethod = ""
 dates = {}
@@ -74,14 +72,14 @@ getDate = (date = false) ->
         date = "today"
     d = chrono.parseDate(date)
 
-    if debug
+    if config.debug
         logger.log "Date:", d
 
     d
 
 # Render the output
 showCompleteLog = ->
-    if debug
+    if config.debug
         logger.log "Showing text"
 
     for index, client of entries
@@ -98,11 +96,11 @@ setRootLabel = (text) ->
 # Yet another callback to wait for parsing to finish
 waitCallback = ->
     counter++
-    if debug
+    if config.debug
         logger.log "Calls complete", callsComplete
         logger.log "Waiting", counter, maxCount
     if callsComplete and counter >= maxCount
-        if debug
+        if config.debug
             logger.log "Ready to show"
 
         if calledMethod == "day"
@@ -132,7 +130,7 @@ dummyHarvestCb = (err, tasks) ->
 # Simple wrapper to the Harvest API that serves to create the restler callback
 getHarvestLog = (options) ->
     callback = if maxCount == 1 then parseHarvestLog else dummyHarvestCb
-    if debug
+    if config.debug
         logger.log "Callback:", callback
     time.daily options, callback
 
@@ -143,7 +141,7 @@ exports.range = dayRange = (from, to) ->
     d = getDate from
     end = getDate to
 
-    if debug
+    if config.debug
         logger.log "Start:", d
         logger.log "End:", end
 
@@ -171,11 +169,15 @@ exports.day = dayDate = (date = false) ->
 exports.week = dayWeek = (date = false) ->
     calledMethod = "week"
     startOfWeek = config.startOfWeek || "Monday"
-    first = getDate "last " + startOfWeek
+    if date
+        date = startOfWeek + " before " + date
+    else
+        date = "last " + startOfWeek
+    first = getDate date
     last = new Date first.getTime()
     last = new Date last.setDate last.getDate() + 6
 
-    if debug
+    if config.debug
         logger.log "Start:", first
         logger.log "End:", last
 

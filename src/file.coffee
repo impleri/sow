@@ -1,8 +1,13 @@
 # File Helper
+'use strict'
 
 fs = require "fs"
 logger = require "loggy"
 
+# Define files
+exports.files = files = {config: "config", aliases: "alias", history: "history"}
+
+# Define main paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
 configParent = configRoot + "/.config"
 configPath = configParent + "/sow"
@@ -42,15 +47,17 @@ createConfigPath = ->
  * @return boolean     True on success, false otherwise.
 ###
 exports.save = saveFile = (file, data) ->
-    saveFile = getFilePath file
+    toFile = getFilePath file
     saveData = JSON.stringify data
 
-    fs.writeFile saveFile, saveData, (err) ->
+    fs.writeFile toFile, saveData, (err) ->
         if err
-            logger.warn "There has been an error writing " + getFilePath file
-            logger.log err.message
+            logger.error "There has been an error writing " + getFilePath file
+            if config.debug
+                logger.log err.message
         else
-            logger.success "Data saved to " + getFilePath file
+            if config.debug
+                logger.success "Data saved to " + getFilePath file
 
     (fs.existsSync file)
 
@@ -63,18 +70,26 @@ exports.save = saveFile = (file, data) ->
  * @return boolean      True on success, false otherwise.
 ###
 exports.read = readFile = (file) ->
-    readFile = getFilePath file
+    tryFile = getFilePath file
 
     try
-        data = require readFile
+        data = require tryFile
     catch err
-        logger.warn err.message
+        # Don't need to see this message under normal conditions
+        if config.debug
+            logger.warn err.message
         data = {}
 
     return data
 
+exports.config = ->
+    readFile files.config
+
+exports.aliases = ->
+    readFile files.aliases
+
+# Check to see if we have a config
+config = readFile files.config
+
 # Run and export things
 createConfigPath()
-
-# Define files
-exports.files = {config: "config", aliases: "alias", history: "history"}

@@ -1,10 +1,9 @@
-# Main logic for Harvest
+# Small module to search Harvest resources for something
 'use strict'
 
-time = require("./harvest").TimeTracking
 config = require("./file").config()
-aliases = require("./file").aliases()
-file = require "./file"
+harvest = require "./harvest"
+cache = require "./cache"
 logger = require "loggy"
 colors = require "colors"
 prompt = require "prompt"
@@ -13,25 +12,16 @@ prompt.message = "Select".cyan;
 prompt.delimiter = " ";
 
 # Show the logged time for a day, defaulting to today
-module.exports = alias = (alias, search, type = "project") ->
-    options = {}
-
-    # Set the resource to search
-    resource = switch type
-        when 'c' then 'client'
-        when 't' then 'task'
-        when 'p' then 'project'
-        else command
-
+module.exports = search = (search, type = "project") ->
     aliases = file.read type + ".aliases"
 
     # Check existing aliases
-
     resources = file.read type
 
     # Perform a search
-    if (typeof search != "int")
+    if typeof search != "int"
         # Check existing cache
+
 
         # Poll Harvest for update if not found in cache
             # Save new cache

@@ -38,18 +38,18 @@
     },
     "dependencies": {
         "coffee-script": "~1.6",
-        "commander": "~2.0.0",
-        "oauth": "~0.9",
         "harvest": "impleri/node-harvest",
-        "loggy": "~0.2.0",
-        "archy": "~0.0",
+        "commander": "~2.0",
+        "oauth": "~0.9",
+        "loggy": "~0.2",
         "colors": "~0.6",
-        "prompt": "~0.2.11"
+        "prompt": "~0.2",
+        "chrono-node": "~0.1",
+        "archy": "~0.0"
     },
     "devDependencies": {
         "mocha": "~1.14",
         "chai": "~1.8",
-        "debug": "~0.7",
         "rewire": "~1.1"
     },
     "readmeFilename": "readme.md",
