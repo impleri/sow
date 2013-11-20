@@ -45,5 +45,3 @@ module.exports = checkCache = (type = "project") ->
 
     # Return the cache
     cache
-
-checkCache "client"

@@ -13,39 +13,30 @@ prompt.delimiter = " ";
 
 # Show the logged time for a day, defaulting to today
 module.exports = search = (search, type = "project") ->
-    aliases = file.read type + ".aliases"
+    # Get current resources
+    resources = cache type
 
-    # Check existing aliases
-    resources = file.read type
-
-    # Perform a search
+    # Search resources if we don't have a direct ID
     if typeof search != "int"
-        # Check existing cache
+        matches = {}
 
+        # Do some fuzzy matching
+        for resource in resources[type]
+            #
 
-        # Poll Harvest for update if not found in cache
-            # Save new cache
 
         # Ask for input if multiple matches
         selected = 0
-        prompt.start()
-        prompt.get type, (err, result) ->
-            selected = result[type] unless err
+        if matches.length > 1
+            prompt.start()
+            prompt.get type, (err, result) ->
+                selected = result[type] unless err
+        # Only one match, so assume it's right
+        else if matches.lentgh == 1
+            selected = 1
+    # Given an integer, so assume it's the right ID
+    else
+        selected = search
 
-        # Should have an integer now
-
-    # Set new alias
-
-    time.daily options, (err, tasks) ->
-        if (err)
-            logger.error err if err
-        else
-            tasks.day_entries.forEach (task, index, array) ->
-                sortTasks task
-
-            for index, client of entries
-                orderNodes client
-
-            s = archy(structure)
-            console.log s
-
+    # Return
+    selected
