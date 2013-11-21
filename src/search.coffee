@@ -39,7 +39,7 @@ module.exports = search = (query, type = "project") ->
         if topX.length > 1
             counter = 1
             for match in matches
-                logger.info counter + '. ' + match.term
+                logger.info "{ counter }. { match.term }"
             logger.info 'C. Cancel'
             cmd.prompt 'Select match: ', (input) ->
                 number = parseInt(input)

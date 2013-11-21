@@ -9,8 +9,8 @@ exports.files = files = {config: "config", aliases: "alias", history: "history"}
 
 # Define main paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
-configParent = configRoot + "/.config"
-configPath = configParent + "/sow"
+configParent = "{ configRoot }/.config"
+configPath = "{ configParent }/sow"
 
 ###
  * Get File Path
@@ -20,7 +20,7 @@ configPath = configParent + "/sow"
  * @return string Complete path to the file.
 ###
 getFilePath = (file) ->
-    configPath + "/" + file + ".json"
+    configPath + "/{ file }.json"
 
 
 ###
@@ -52,12 +52,12 @@ exports.save = saveFile = (file, data) ->
 
     fs.writeFile toFile, saveData, (err) ->
         if err
-            logger.error "There has been an error writing " + getFilePath file
+            logger.error "There has been an error writing { getFilePath file }"
             if config.debug
                 logger.log err.message
         else
             if config.debug
-                logger.success "Data saved to " + getFilePath file
+                logger.success "Data saved to { getFilePath file }"
 
     (fs.existsSync file)
 

@@ -11,14 +11,14 @@ config = file.config()
 # Show the logged time for a day, defaulting to today
 module.exports = checkCache = (type = "project") ->
     if config.debug
-        logger.log "Loading cache for " + type
+        logger.log "Loading cache for { type }"
 
     fileName = type + "s"
     cache = file.read fileName
     if config.debug
         logger.log "Cache", cache
-    lastGenerated = cache.generated || 0
-    cacheLife = config.cacheLife || 7
+    lastGenerated = cache.generated or 0
+    cacheLife = config.cacheLife or 7
     generated = new Date lastGenerated
     now = new Date
     generated.setDate generated.getDate() + cacheLife
@@ -31,7 +31,7 @@ module.exports = checkCache = (type = "project") ->
     # Refresh cache if needed
     if now.getTime() > generated.getTime()
         if config.debug
-            logger.log "Regenerating cache for " + type
+            logger.log "Regenerating cache for { type }"
 
             resource = fileName[0].toUpperCase() + fileName.slice 1
             harvest[resource].list {debug: true}, (err, data) ->

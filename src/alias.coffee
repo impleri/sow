@@ -17,7 +17,7 @@ module.exports = alias = (alias, query, type = "project") ->
     options = {}
 
     # Set the resource to search
-    aliases = file.read type + ".aliases"
+    aliases = "{ file.read type }.aliases"
 
     # Check existing aliases
     if aliases[alias]
