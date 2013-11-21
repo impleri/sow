@@ -14,7 +14,9 @@ cmd.command('alias <alias> <resource>')
             when 'c' then 'client'
             when 't' then 'task'
             when 'p' then 'project'
+            when 'u' then 'user'
             else cmd.type
+        console.log "Selected type: " + cmd.type
         commands.alias cmd.args[0], cmd.args[1], type
 
 cmd.command('day [date]')
