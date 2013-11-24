@@ -9,14 +9,13 @@ cmd.version(require("../package.json").version)
 cmd.command('alias <alias> <resource>')
     .description('Create an alias for a Harvest resource. Shortcut: a')
     .option('-t, --type <type>', 'specify the resource type for which to create an alias. Default: project')
-    .action ->
-        type = switch cmd.type
+    .action (prog, args, program) ->
+        type = switch program.type
             when 'c' then 'client'
             when 't' then 'task'
             when 'p' then 'project'
             when 'u' then 'user'
-            else cmd.type
-        console.log "Selected type: " + cmd.type
+            else program.type
         commands.alias cmd.args[0], cmd.args[1], type
 
 cmd.command('day [date]')

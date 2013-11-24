@@ -5,12 +5,12 @@ fs = require "fs"
 logger = require "loggy"
 
 # Define files
-exports.files = files = {config: "config", aliases: "alias", history: "history"}
+exports.files = files = {config: "config", aliases: "aliases", history: "history"}
 
 # Define main paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
-configParent = "{ configRoot }/.config"
-configPath = "{ configParent }/sow"
+configParent = "#{ configRoot }/.config"
+configPath = "#{ configParent }/sow"
 
 ###
  * Get File Path
@@ -20,7 +20,7 @@ configPath = "{ configParent }/sow"
  * @return string Complete path to the file.
 ###
 getFilePath = (file) ->
-    configPath + "/{ file }.json"
+    configPath + "/#{ file }.json"
 
 
 ###
@@ -49,15 +49,17 @@ createConfigPath = ->
 exports.save = saveFile = (file, data) ->
     toFile = getFilePath file
     saveData = JSON.stringify data
+    if config.debug
+        logger.log "Saving #{ toFile }", saveData
 
     fs.writeFile toFile, saveData, (err) ->
         if err
-            logger.error "There has been an error writing { getFilePath file }"
+            logger.error "There has been an error writing #{ getFilePath file }"
             if config.debug
                 logger.log err.message
         else
             if config.debug
-                logger.success "Data saved to { getFilePath file }"
+                logger.success "Data saved to #{ getFilePath file }"
 
     (fs.existsSync file)
 
@@ -76,8 +78,7 @@ exports.read = readFile = (file) ->
         data = require tryFile
     catch err
         # Don't need to see this message under normal conditions
-        if config.debug
-            logger.warn err.message
+        logger.warn err.message
         data = {}
 
     return data
@@ -87,6 +88,9 @@ exports.config = ->
 
 exports.aliases = ->
     readFile files.aliases
+
+exports.resource = (type) ->
+    "#{ type }s"
 
 # Check to see if we have a config
 config = readFile files.config

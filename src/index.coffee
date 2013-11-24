@@ -7,7 +7,8 @@ exports.day = summary.day
 exports.range = summary.range
 exports.week = summary.week
 
-exports.alias = require "./alias"
+alias = require "./alias"
+exports.alias = alias.set
 
 # timer = require "./timer"
 # exports.start = timer.start
