@@ -48,11 +48,10 @@ createConfigPath = ->
 ###
 exports.save = saveFile = (file, data) ->
     toFile = getFilePath file
-    saveData = JSON.stringify data
     if config.debug
-        logger.log "Saving #{ toFile }", saveData
+        logger.log "Saving #{ toFile }", data
 
-    fs.writeFile toFile, saveData, (err) ->
+    fs.writeFile toFile, JSON.stringify(data), (err) ->
         if err
             logger.error "There has been an error writing #{ getFilePath file }"
             if config.debug

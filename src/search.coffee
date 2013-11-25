@@ -58,9 +58,9 @@ performSearch = (err, data) ->
                     if result[type] == "c" or result[type] == "C"
                         logger.warn "Cancelling action"
                         process.exit 0
-                    # else if result[type]
-                    #   logger.error "Invalid selection detected"
-                    #   process.exit 1
+                    else if not result[type].match /[0-9]+/
+                        logger.error "Invalid selection detected"
+                        process.exit 1
                     number = parseInt result[type]
                     if config.debug
                         logger.log "Detected selection of #{ number }"

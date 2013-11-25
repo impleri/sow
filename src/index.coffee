@@ -9,9 +9,10 @@ exports.week = summary.week
 
 alias = require "./alias"
 exports.alias = alias.set
+exports.aliases = alias.list
 
-# timer = require "./timer"
-# exports.start = timer.start
+timer = require "./track"
+exports.start = timer.start
 # exports.pause = timer.pause
 # exports.resume = timer.resume
 # exports.log = timer.log

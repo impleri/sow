@@ -12,7 +12,7 @@ aliases = ""
 aliasType = ""
 activeAlias = ""
 
-setAlias = (match) ->
+aliasCallback = (match) ->
     if config.debug
         logger.log "Match: #{ match }"
 
@@ -26,17 +26,42 @@ setAlias = (match) ->
 
 
 # Show the logged time for a day, defaulting to today
-exports.set = alias = (alias, query, type = "project") ->
+exports.set = setAlias = (alias, query, type = "project") ->
     aliasType = type
     activeAlias = alias
 
-    # Set the resource to search
+    # Read the resource to search
     aliases = file.aliases()
 
     # Check existing aliases
     if aliases and aliases[type] and aliases[type][alias]
-        logger.err "Alias already exists"
-        false
+        logger.error "Alias #{ alias } already exists"
+        process.exit 1
 
     # Search for a match
-    search query, type, setAlias
+    search query, type, aliasCallback
+
+exports.get = getAlias = (alias, type = "project") ->
+    # Already have an ID
+    if alias.match /[0-9]+/
+        +alias
+    else
+        # Set the resource to search
+        aliases = file.aliases()
+
+        # Check existing aliases
+        if aliases and aliases[type] and aliases[type][alias]
+            aliases[type][alias]
+        else
+            logger.error "No #{ type } alias found for #{ alias }"
+            process.exit 1
+
+exports.list = listAliases = (type = "project") ->
+    aliases = file.aliases()
+
+    # Check existing aliases
+    if aliases and aliases[type]
+        for alias, id of aliases[type]
+            logger.info "#{ alias }: #{ id }"
+
+
