@@ -27,7 +27,7 @@ cmd.command('alias <alias> <resource>')
 # Alias listing
 cmd.command('list <resource>')
     .description('Show all aliases for a Harvest resource. Shortcut: la')
-    .action (prog, args, program) ->
+    .action ->
         commands.aliases parseAlias cmd.args[0]
 
 
@@ -53,8 +53,9 @@ cmd.command('week [date]')
 
 
 # Start time tracking
+#  Project and task can be passed as a single string in dot notation (i.e. project.task) or as two separate arguments. Optionally adding initial time spent to the timer and/or a note.
 cmd.command('start <project> [task] [time] [note]')
-    .description('Start a new timer for a given task. Project and task can be passed as a single string in dot notation (i.e. project.task) or as two separate arguments. Optionally adding initial time spent to the timer and/or a note. Shortcut: s')
+    .description('Start a new timer for a given task. Shortcut: s')
     .action ->
         taskString = cmd.args[0]
         if taskString.match /\./
@@ -68,7 +69,6 @@ cmd.command('start <project> [task] [time] [note]')
 
         commands.start taskString, time, note
 
-
 # Pause/stop time tracking
 cmd.command('pause')
     .description('Stops the currently running timer. Shortcut: p')
@@ -77,10 +77,13 @@ cmd.command('pause')
 
 
 # Resume time tracking
-cmd.command('resume')
+cmd.command('resume [entry]')
     .description('Restarts the last running timer. Shortcut: r')
-    .action ->
-        commands.resume()
+    .option('-n, --negative', 'Indicate that the number is negative')
+    .action (args, program) ->
+        index = parseInt(cmd.args[0])
+        index *= -1 if program.negative?
+        commands.resume index
 
 # The function is executed every time user runs `bin/sow`
 exports.run = ->

@@ -12,7 +12,6 @@ action = ""
 
 # Initial callback to parse callback
 trackCallback = (err, data) ->
-    logger.success "Track!"
     if err
         logger.error err
     else
@@ -28,6 +27,7 @@ trackCallback = (err, data) ->
             history.chrono.push data.id
 
         file.save file.files.history, history
+        logger.success "Starting timer for #{data.task} in #{data.project}"
 
 timerCallbackStop = (err, data) ->
     if err
@@ -35,18 +35,20 @@ timerCallbackStop = (err, data) ->
     else
         timer.toggleTimer data, toggleCallback if data.timer_started_at
 
+
+
 timerCallbackStart = (err, data) ->
     if err
         logger.error err
     else
         timer.toggleTimer data, trackCallback unless data.timer_started_at
 
+
 toggleCallback = (err, data) ->
-    logger.success "Toggle!"
     if err
         logger.error err
     else
-        console.log data
+        logger.success "Stopped timer for #{data.task} in #{data.project}"
 
 
 # Helper method to ensure project and task IDs
@@ -81,6 +83,21 @@ parseOptions = (taskString, time = "", note = "") ->
         hours: hours
         notes: note
     }
+
+
+getHistoryEntry = (entry) ->
+    history = file.history()
+    end = history.chrono.length
+
+    if entry < 0 <= end - entry
+        index = end + entry
+        match = history.chrono[index-1...index].pop()
+    else if entry < end
+        match = history.chrono[entry-1...entry].pop()
+    else
+        match = history.chrono.pop()
+    match
+    
 
 
 generateTimeStamp = (date = false) ->
@@ -147,5 +164,13 @@ exports.pause = pauseTimer = ->
         logger.log "Pausing"
     toggleTimer file.history().chrono.pop(), timerCallbackStop
 
-exports.resume = resumeTimer = ->
-    toggleTimer file.history().chrono.pop(), timerCallbackStart
+exports.resume = resumeTimer = (entry) ->
+    if entry
+        task = getHistoryEntry entry
+    else
+        task = file.history().chrono.pop()
+
+    if config.debug
+        logger.log "Toggling #{task}"
+
+    toggleTimer task, timerCallbackStart
