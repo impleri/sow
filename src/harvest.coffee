@@ -18,3 +18,5 @@ module.exports = new harvestClass
     subdomain: config.subdomain
     email: config.email
     password: config.password
+
+module.exports.debug = config.debugHarvest if config.debugHarvest?

@@ -61,6 +61,11 @@ cmd.command('start <project> [task] [time] [note]')
 
         commands.start taskString, time, note
 
+cmd.command('pause')
+    .description('Stops the last running timer. Shortcut: p')
+    .action ->
+        commands.pause()
+
 # The function is executed every time user runs `bin/sow`
 exports.run = ->
     args = process.argv.slice()

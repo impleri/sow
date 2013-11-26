@@ -30,11 +30,11 @@ getFilePath = (file) ->
 ###
 createConfigPath = ->
     fs.exists configParent, (exists) ->
-        if !exists
+        if not exists
             fs.mkdir configParent, "755"
 
         fs.exists configPath, (exists) ->
-            if !exists
+            if not exists
                 fs.mkdir configPath, "755"
 
 
@@ -87,6 +87,22 @@ exports.config = ->
 
 exports.aliases = ->
     readFile files.aliases
+
+exports.history = ->
+    data = readFile files.history
+    lastGenerated = data.generated or 0
+    generated = new Date lastGenerated
+    now = new Date
+    now.setHours 0, 0, 0, 0
+
+    # Refresh cache if needed
+    if not Object.keys(data).length or now.getTime() isnt generated.getTime()
+        data = {
+            generated: now.getTime()
+            entries: {}
+            chrono: []
+        }
+    data
 
 exports.resource = (type) ->
     "#{ type }s"
