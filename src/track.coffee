@@ -10,7 +10,7 @@ colors = require "colors"
 config = file.config()
 action = ""
 
-# Initial callback to parse callback
+# Callback for starting timers to keep history
 trackCallback = (err, data) ->
     if err
         logger.error err
@@ -27,7 +27,9 @@ trackCallback = (err, data) ->
             history.chrono.push data.id
 
         file.save file.files.history, history
-        logger.success "Starting timer for #{data.task} in #{data.project}"
+        logger.success "Started timer for #{data.task} in #{data.project} (#{data.client}) at #{data.timer_started_at}."
+        if data.hours > 0
+            logger.log "#{data.hours} hours already logged."
 
 timerCallbackStop = (err, data) ->
     if err
@@ -48,7 +50,8 @@ toggleCallback = (err, data) ->
     if err
         logger.error err
     else
-        logger.success "Stopped timer for #{data.task} in #{data.project}"
+        logger.success "Stopped timer for #{data.task} in #{data.project} (#{data.client})."
+        logger.log "#{data.hours} hours logged."
 
 
 # Helper method to ensure project and task IDs
@@ -160,8 +163,6 @@ exports.start = startTimer = (task, time = "", note = "") ->
 
 
 exports.pause = pauseTimer = ->
-    if config.debug
-        logger.log "Pausing"
     toggleTimer file.history().chrono.pop(), timerCallbackStop
 
 exports.resume = resumeTimer = (entry) ->
@@ -169,8 +170,5 @@ exports.resume = resumeTimer = (entry) ->
         task = getHistoryEntry entry
     else
         task = file.history().chrono.pop()
-
-    if config.debug
-        logger.log "Toggling #{task}"
 
     toggleTimer task, timerCallbackStart
