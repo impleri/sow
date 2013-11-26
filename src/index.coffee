@@ -13,6 +13,6 @@ exports.aliases = alias.list
 
 timer = require "./track"
 exports.start = timer.start
-# exports.pause = timer.pause
-# exports.resume = timer.resume
-# exports.log = timer.log
+exports.pause = timer.pause
+exports.resume = timer.resume
+exports.log = timer.log

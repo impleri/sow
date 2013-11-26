@@ -17,6 +17,22 @@ trackCallback = (err, data) ->
     else
         logger.log data
 
+###
+{ timer_started_at: '2013-11-26T02:47:50Z',
+  project_id: '3833177',
+  project: 'HTML5 Audio player updates',
+  user_id: 375584,
+  spent_at: '2013-11-25',
+  task_id: '325784',
+  task: 'DD: Development',
+  client: 'WWOZ Web Development, Production, and Support FY 2014',
+  id: 186829144,
+  notes: '',
+  created_at: '2013-11-26T02:47:50Z',
+  updated_at: '2013-11-26T02:47:50Z',
+  hours_without_timer: 0,
+  hours: 0 }
+###
 
 toggleCallback = (err, data) ->
     logger.success "Toggle!"
@@ -81,13 +97,27 @@ exports.log = logTime = (date = false) ->
 exports.start = startTimer = (task, time = "", note = "") ->
     options = parseAliasString task
     options.spent_at = generateTimeStamp()
-    options.notes = note
     options.hours = ""
     cb = trackCallback
 
-    if time.match /[+]?[0-9]+[\.:][0-9]+/
-        options.hours = time.replace "+", ""
+    if time.match /^\+?\d+(\.|:)\d+$/
+        time = time.replace "+", ""
         cb = toggleCallback
+
+        # convert HH:MM to HH.MM
+        if time.match /:/
+            time_parts = time.split ":"
+            hours = time_parts[0...1].pop()
+            minutes = time_parts[1...2].pop()
+            time = parseInt(hours) + parseInt(minutes)/60
+
+        options.hours = parseFloat time
+
+    else
+        # Time doesn't look like a time entry and note is empty, so assume time is a note
+        note = time + " " + note
+
+    options.notes = note
 
     if config.debug
         logger.log options

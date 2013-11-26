@@ -27,6 +27,9 @@ sortTasks = (entry) ->
     time = entry.hours
     note = entry.notes || "Unnoted"
 
+    if timer_started_at
+        note += " (running)".red.bold
+
     if (!entries[client])
         entries[client] = {name: client, total: 0.00, projects: {}}
 
