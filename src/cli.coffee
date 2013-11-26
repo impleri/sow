@@ -71,10 +71,16 @@ cmd.command('start <project> [task] [time] [note]')
 
 # Pause/stop time tracking
 cmd.command('pause')
-    .description('Stops the last running timer. Shortcut: p')
+    .description('Stops the currently running timer. Shortcut: p')
     .action ->
         commands.pause()
 
+
+# Resume time tracking
+cmd.command('resume')
+    .description('Restarts the last running timer. Shortcut: r')
+    .action ->
+        commands.resume()
 
 # The function is executed every time user runs `bin/sow`
 exports.run = ->
@@ -88,6 +94,7 @@ exports.run = ->
         when 'w' then 'week'
         when 's' then 'start'
         when 'p' then 'pause'
+        when 'r' then 'resume'
         when 'stop' then 'pause'
         else command
 
