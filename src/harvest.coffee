@@ -19,4 +19,4 @@ module.exports = new harvestClass
     email: config.email
     password: config.password
 
-module.exports.debug = config.debugHarvest if config.debugHarvest?
+module.exports.debug = config.debugHarvest if config.debugHarvest

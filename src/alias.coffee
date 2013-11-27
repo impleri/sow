@@ -1,4 +1,4 @@
-# Main logic for Harvest
+# Manage aliases
 'use strict'
 
 time = require("./harvest").TimeTracking
@@ -7,25 +7,22 @@ search = require "./search"
 logger = require "loggy"
 colors = require "colors"
 prompt = require "prompt"
+
 config = file.config()
-aliases = ""
-aliasType = ""
-activeAlias = ""
+aliasType = activeAlias = ""
+aliases = {}
 
+
+# Callback for search submodule to set an alias
 aliasCallback = (match) ->
-    if config.debug
-        logger.log "Match: #{ match }"
-
-    # Set new alias
     if match > 0
-        if not aliases[aliasType]
-            aliases[aliasType] = {}
+        aliases[aliasType] = {} unless aliases[aliasType]
         aliases[aliasType][activeAlias] = match
         file.save file.files.aliases, aliases
-        logger.success "Set #{ aliasType } alias for ID #{ match } as #{ activeAlias }"
+        logger.success "Set #{aliasType} alias for ID #{match} as #{activeAlias}"
 
 
-# Show the logged time for a day, defaulting to today
+# Set an alias by fuzzy search query
 exports.set = setAlias = (alias, query, type = "project") ->
     aliasType = type
     activeAlias = alias
@@ -34,34 +31,35 @@ exports.set = setAlias = (alias, query, type = "project") ->
     aliases = file.aliases()
 
     # Check existing aliases
-    if aliases and aliases[type] and aliases[type][alias]
-        logger.error "Alias #{ alias } already exists"
+    if aliases[type] and aliases[type][alias]
+        logger.error "Alias #{alias} already exists"
         process.exit 1
 
     # Search for a match
     search query, type, aliasCallback
 
+
+# Get a resource ID from a given alias
 exports.get = getAlias = (alias, type = "project") ->
     # Already have an ID
     if alias.match /[0-9]+/
         +alias
     else
-        # Set the resource to search
         aliases = file.aliases()
 
         # Check existing aliases
-        if aliases and aliases[type] and aliases[type][alias]
+        if aliases[type] and aliases[type][alias]
             aliases[type][alias]
         else
-            logger.error "No #{ type } alias found for #{ alias }"
+            logger.error "No #{type} alias found for #{alias}"
             process.exit 1
 
+
+# List all aliases for a resource type
 exports.list = listAliases = (type = "project") ->
     aliases = file.aliases()
 
-    # Check existing aliases
-    if aliases and aliases[type]
+    if aliases[type]
         for alias, id of aliases[type]
-            logger.info "#{ alias }: #{ id }"
-
+            logger.info "#{alias}: #{id}"
 

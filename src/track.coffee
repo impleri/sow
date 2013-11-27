@@ -7,6 +7,7 @@ alias = require "./alias"
 crypto = require "crypto"
 logger = require "loggy"
 colors = require "colors"
+
 config = file.config()
 action = ""
 
@@ -32,18 +33,14 @@ trackCallback = (err, data) ->
             logger.log "#{data.hours} hours already logged."
 
 timerCallbackStop = (err, data) ->
-    if err
-        logger.error err
-    else
-        timer.toggleTimer data, toggleCallback if data.timer_started_at
+    logger.error err if err
+    timer.toggleTimer data, toggleCallback if data.timer_started_at?
 
 
 
 timerCallbackStart = (err, data) ->
-    if err
-        logger.error err
-    else
-        timer.toggleTimer data, trackCallback unless data.timer_started_at
+    logger.error err if err
+    timer.toggleTimer data, trackCallback unless data.timer_started_at?
 
 
 toggleCallback = (err, data) ->
@@ -100,7 +97,7 @@ getHistoryEntry = (entry) ->
     else
         match = history.chrono.pop()
     match
-    
+
 
 
 generateTimeStamp = (date = false) ->

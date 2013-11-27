@@ -98,6 +98,7 @@ exports.run = ->
         when 's' then 'start'
         when 'p' then 'pause'
         when 'r' then 'resume'
+        when 'la' then 'list'
         when 'stop' then 'pause'
         else command
 

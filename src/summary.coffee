@@ -1,4 +1,4 @@
-# Main logic for summarising entries
+# Simple reporting of logged tasks for date ranges
 'use strict'
 
 time = require("./harvest").TimeTracking
@@ -12,12 +12,60 @@ totalHours = 0.00
 counter = maxCount = 0
 callsComplete = false
 calledMethod = ""
-dates = {}
-entries = {}
-structure = {
+dates = entries = {}
+structure =
     label: ""
     nodes: []
-}
+
+# Constructs an object to render in archy
+orderNodes = (client) ->
+    clientNodes = []
+    for index, project of client.projects
+        projectNodes = []
+        for index, task of project.tasks
+            taskNodes = []
+            for index, note of task.notes
+                taskNodes.push "#{note.total.toFixed(2)} hours: #{note.name.italic}"
+            projectNodes.push
+                label: "#{task.name.yellow} (#{task.total.toFixed(2).yellow} hours)"
+                nodes: taskNodes
+        clientNodes.push
+            label: "#{project.name.cyan} (#{project.total.toFixed(2).cyan} hours)"
+            nodes: projectNodes
+    structure.nodes.push
+        label: "#{client.name.green.bold} (#{client.total.toFixed(2).green.bold} hours)"
+        nodes: clientNodes
+
+
+# Render the output
+showCompleteLog = ->
+    for index, client of entries
+        orderNodes client
+
+    console.log ""
+    console.log archy structure
+
+
+# Helper function to set the root label of the archy structure
+setRootLabel = ->
+    label = switch calledMethod
+        when "day" then dates.end.toDateString()
+        when "week" then "Week ending #{dates.end.toDateString()}"
+        else "#{dates.start.toDateString()} -- #{dates.end.toDateString()}"
+    structure.label = "#{label.red.bold}: #{totalHours.toFixed(2).red.bold} hours"
+
+
+# Helper callback function to delay rendering until retrieval and parsing are complete
+syncParsing = ->
+    counter++
+
+    if config.debug
+        logger.log "Waiting (#{counter} of #{maxCount})" if maxCount > 1
+
+    if callsComplete and counter >= maxCount
+        setRootLabel()
+        showCompleteLog()
+
 
 # Sorts tasks by client and project
 sortTasks = (entry) ->
@@ -49,93 +97,25 @@ sortTasks = (entry) ->
     entries[client].projects[project].tasks[task].notes[note].total += time
 
 
-# Constructs an object for archy
-orderNodes = (client) ->
-    clientNodes = []
-    for index, project of client.projects
-        projectNodes = []
-        for index, task of project.tasks
-            taskNodes = []
-            for index, note of task.notes
-                taskNodes.push note.total.toFixed(2) + " hours: " + note.name.italic
-            projectNodes.push
-                label: task.name.yellow + " (" + task.total.toFixed(2).yellow + " hours)"
-                nodes: taskNodes
-        clientNodes.push
-            label: project.name.cyan + " (" + project.total.toFixed(2).cyan + " hours)"
-            nodes: projectNodes
-    structure.nodes.push
-        label: client.name.green.bold + " (" + client.total.toFixed(2).green.bold + " hours)"
-        nodes: clientNodes
+# Callback to parse data from Harvest and synchronise multiple callouts
+summaryCallback = (err, tasks) ->
+    if err
+        logger.error err
+    else
+        if tasks.day_entries
+            for task in tasks.day_entries
+                sortTasks task
+        syncParsing()
+
+
+# Dummy callback to prevent duplicating parsing
+dummyCallback = (err, tasks) ->
 
 
 # Small helper to parse a given date
 getDate = (date = false) ->
-    if (!date)
-        date = "today"
-    d = chrono.parseDate(date)
-
-    if config.debug
-        logger.log "Date:", d
-
-    d
-
-# Render the output
-showCompleteLog = ->
-    if config.debug
-        logger.log "Showing text"
-
-    for index, client of entries
-        orderNodes client
-
-    console.log archy structure
-
-
-# Set the root label for archy
-setRootLabel = (text) ->
-    structure.label = text.red.bold + ": " + totalHours.toFixed(2).red.bold + " hours"
-
-
-# Yet another callback to wait for parsing to finish
-waitCallback = ->
-    counter++
-    if config.debug
-        logger.log "Calls complete", callsComplete
-        logger.log "Waiting", counter, maxCount
-    if callsComplete and counter >= maxCount
-        if config.debug
-            logger.log "Ready to show"
-
-        if calledMethod == "day"
-            setRootLabel dates.end.toDateString()
-        else if calledMethod == "week"
-            setRootLabel "Week ending " + dates.end.toDateString()
-        else
-            setRootLabel dates.start.toDateString() + " -- " + dates.end.toDateString()
-        showCompleteLog()
-
-
-# Initial callback to parse callback
-parseHarvestLog = (err, tasks) ->
-    if (err)
-        logger.error err
-    else
-        if tasks.day_entries
-            tasks.day_entries.forEach (task, index, array) ->
-                sortTasks task
-        waitCallback()
-
-
-# Dummy callback to prevent duplicating parsing
-dummyHarvestCb = (err, tasks) ->
-
-
-# Simple wrapper to the Harvest API that serves to create the restler callback
-getHarvestLog = (options) ->
-    callback = if maxCount == 1 then parseHarvestLog else dummyHarvestCb
-    if config.debug
-        logger.log "Callback:", callback
-    time.daily options, callback
+    date = "today" unless date
+    chrono.parseDate(date)
 
 
 # Show the logged time entries for a range of dates
@@ -145,8 +125,8 @@ exports.range = dayRange = (from, to) ->
     end = getDate to
 
     if config.debug
-        logger.log "Start:", d
-        logger.log "End:", end
+        logger.log "Start: #{d.toDateString()}"
+        logger.log "End: #{end.toDateString()}"
 
     start = new Date d.setDate d.getDate() - 1
     dates = {
@@ -154,11 +134,15 @@ exports.range = dayRange = (from, to) ->
         end: end
     }
 
-    while (start < end)
-        options.date = start = new Date start.setDate start.getDate() + 1
+    while start < end
         maxCount++
+        options.date = start = new Date start.setDate start.getDate() + 1
+        callback = if maxCount is 1 then summaryCallback else dummyCallback
         callsComplete = true if start >= end
-        getHarvestLog options
+        if config.debug
+            logger.log "Callouts are complete" if callsComplete
+
+        time.daily options, callback
 
 
 # Show the logged time for a day, defaulting to today
@@ -171,17 +155,15 @@ exports.day = dayDate = (date = false) ->
 # Show the logged time for an entire week, defaulting to this week
 exports.week = dayWeek = (date = false) ->
     calledMethod = "week"
-    startOfWeek = config.startOfWeek || "Monday"
+    startOfWeek = config.startOfWeek or "Monday"
+
     if date
-        date = startOfWeek + " before " + date
+        date = "#{startOfWeek} before #{date}"
     else
-        date = "last " + startOfWeek
+        date = "last #{startOfWeek}"
+
     first = getDate date
     last = new Date first.getTime()
     last = new Date last.setDate last.getDate() + 6
-
-    if config.debug
-        logger.log "Start:", first
-        logger.log "End:", last
-
     dayRange first.toDateString(), last.toDateString()
+
