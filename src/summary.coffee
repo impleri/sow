@@ -157,10 +157,8 @@ exports.week = dayWeek = (date = false) ->
     calledMethod = "week"
     startOfWeek = config.startOfWeek or "Monday"
 
-    if date
-        date = "#{startOfWeek} before #{date}"
-    else
-        date = "last #{startOfWeek}"
+    date = "today" unless date
+    date = "#{startOfWeek} before #{date}"
 
     first = getDate date
     last = new Date first.getTime()
