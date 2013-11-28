@@ -1,13 +1,14 @@
 # Manage aliases
 'use strict'
 
-time = require("./harvest").TimeTracking
+harvest = require "./harvest"
 file = require "./file"
 search = require "./search"
 logger = require "loggy"
 colors = require "colors"
 prompt = require "prompt"
 
+timer = harvest.TimeTracking
 config = file.config()
 aliasType = activeAlias = ""
 aliases = {}
@@ -55,10 +56,15 @@ exports.get = getAlias = (alias, type = "project") ->
 
 
 # List all aliases for a resource type
-exports.list = listAliases = (type = "project") ->
+exports.list = listAliases = (type = false) ->
     aliases = file.aliases()
 
-    if aliases[type]
+    if type and aliases[type]
         for alias, id of aliases[type]
             logger.info "#{alias}: #{id}"
-
+    else
+        for type, details of aliases
+            logger.info "#{harvest.getResourceName type}".bold.blue
+            for alias, id of details
+                logger.info "#{alias}: #{id}"
+            console.log ""

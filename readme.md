@@ -36,11 +36,11 @@ contain spaces must be enclosed in quotation marks.
 
     Parameters: [--type = project] alias resource
 
-* list [la]
+* aliases [la]
 
     Shows all aliases for a given resource.
 
-    Parameters: <resource>
+    Parameters: [--type = project] alias resource
 
 
 ### Time Entry

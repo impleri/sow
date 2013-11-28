@@ -13,6 +13,10 @@ parseAlias = (input) ->
         when 't' then 'task'
         when 'p' then 'project'
         when 'u' then 'user'
+        when 'clients' then 'client'
+        when 'tasks' then 'task'
+        when 'projects' then 'project'
+        when 'users' then 'user'
         else input
 
 
@@ -25,10 +29,19 @@ cmd.command('alias <alias> <resource>')
 
 
 # Alias listing
-cmd.command('list <resource>')
+cmd.command('aliases')
     .description('Show all aliases for a Harvest resource. Shortcut: la')
-    .action (resource) ->
-        commands.aliases parseAlias resource
+    .option('-t, --type <type>', 'specify the resource type for limiting the listing. Default: project')
+    .action (program) ->
+        commands.aliases parseAlias program.type
+
+
+# Resource listing
+cmd.command('list [resource]')
+    .description('Show all of a given resource in Harvest (default = project). Shortcut: ls')
+    .option('-c, --client <client>', 'specify a client alias to limit the listing of tasks.')
+    .action (resource, program) ->
+        commands.list parseAlias(resource), program.client
 
 
 # Summary reporting (range)
@@ -114,10 +127,13 @@ exports.run = ->
         when 'a' then 'alias'
         when 'd' then 'day'
         when 'w' then 'week'
+        when 'l' then 'log'
         when 's' then 'start'
         when 'p' then 'pause'
         when 'r' then 'resume'
-        when 'la' then 'list'
+        when 'n' then 'note'
+        when 'la' then 'aliases'
+        when 'ls' then 'list'
         when 'stop' then 'pause'
         else command
 
