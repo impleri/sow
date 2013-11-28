@@ -16,3 +16,4 @@ exports.start = timer.start
 exports.pause = timer.pause
 exports.resume = timer.resume
 exports.log = timer.log
+exports.note = timer.note

@@ -9,7 +9,7 @@ logger = require "loggy"
 colors = require "colors"
 
 config = file.config()
-action = ""
+action = updateNote = ""
 
 # Callback for starting timers to keep history
 trackCallback = (err, data) ->
@@ -17,10 +17,13 @@ trackCallback = (err, data) ->
         logger.error err
     else
         history = file.history()
-        hash = crypto.createHash("md5").update(data.notes).digest "hex"
+        hash = crypto.createHash("md5").update(data.id + data.notes).digest "hex"
         history.entries[data.project_id] = {} unless history.entries[data.project_id]
         history.entries[data.project_id][data.task_id] = {} unless history.entries[data.project_id][data.task_id]
         history.entries[data.project_id][data.task_id][hash] = data.id unless history.entries[data.project_id][data.task_id][hash]
+
+        first = history.chrono.shift()
+        history.chrono.unshift first if first?
 
         last = history.chrono.pop()
         history.chrono.push last
@@ -28,19 +31,25 @@ trackCallback = (err, data) ->
             history.chrono.push data.id
 
         file.save file.files.history, history
-        logger.success "Started timer for #{data.task} in #{data.project} (#{data.client}) at #{data.timer_started_at}."
+        logger.success "Started timer for #{data.task} in #{data.project} (#{data.client})."
         if data.hours > 0
             logger.log "#{data.hours} hours already logged."
+
 
 timerCallbackStop = (err, data) ->
     logger.error err if err
     timer.toggleTimer data, toggleCallback if data.timer_started_at?
 
 
-
 timerCallbackStart = (err, data) ->
     logger.error err if err
     timer.toggleTimer data, trackCallback unless data.timer_started_at?
+
+
+timerCallbackUpdate = (err, data) ->
+    logger.error err if err
+    data.notes = updateNote
+    timer.update data, updatedCallback if data.timer_started_at?
 
 
 toggleCallback = (err, data) ->
@@ -49,6 +58,22 @@ toggleCallback = (err, data) ->
     else
         logger.success "Stopped timer for #{data.task} in #{data.project} (#{data.client})."
         logger.log "#{data.hours} hours logged."
+
+
+loggedCallback = (err, data) ->
+    if err
+        logger.error err
+    else
+        logger.success "Logged #{data.hours} hours for #{data.task} in #{data.project} (#{data.client})."
+
+
+updatedCallback = (err, data) ->
+    if err
+        logger.error err
+    else
+        logger.success "Updated notes for #{data.task} in #{data.project} (#{data.client}) to #{data.notes}."
+        process.exit 0
+
 
 
 # Helper method to ensure project and task IDs
@@ -99,7 +124,6 @@ getHistoryEntry = (entry) ->
     match
 
 
-
 generateTimeStamp = (date = false) ->
     if date
         date = new Date date
@@ -132,6 +156,7 @@ generateTimeStamp = (date = false) ->
     # Tue, 17 Oct 2006
     "#{ dayName }, #{ date.getDate() } #{ monthName } #{ date.getFullYear() }"
 
+
 toggleTimer = (entry, cb) ->
     if config.debug
         logger.log "Getting entry #{ entry }"
@@ -139,17 +164,21 @@ toggleTimer = (entry, cb) ->
         id: entry
     timer.get data, cb
 
+
 # Show the logged time for a day, defaulting to today
-exports.log = logTime = (date = false) ->
-    # project(.| )task [comment]
-    calledMethod = "day"
-    d = getDate date
-    dayRange d.toDateString(), d.toDateString()
+exports.log = logTime = (task, time = "", note = "") ->
+    options = parseOptions task, time, note
+    cb = loggedCallback
+
+    if config.debug
+        logger.log options
+
+    timer.create options, cb
 
 
 # Start a new timer
 exports.start = startTimer = (task, time = "", note = "") ->
-    options = parseOptions task
+    options = parseOptions task, time, note
     cb = trackCallback
     cb = toggleCallback if time.match /^\+?\d+(\.|:)\d+$/
 
@@ -162,6 +191,7 @@ exports.start = startTimer = (task, time = "", note = "") ->
 exports.pause = pauseTimer = ->
     toggleTimer file.history().chrono.pop(), timerCallbackStop
 
+
 exports.resume = resumeTimer = (entry) ->
     if entry
         task = getHistoryEntry entry
@@ -169,3 +199,9 @@ exports.resume = resumeTimer = (entry) ->
         task = file.history().chrono.pop()
 
     toggleTimer task, timerCallbackStart
+
+
+# Update the running timer with a new note
+exports.note = noteTime = (note = "") ->
+    updateNote = note
+    toggleTimer file.history().chrono.pop(), timerCallbackUpdate

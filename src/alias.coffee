@@ -12,7 +12,6 @@ config = file.config()
 aliasType = activeAlias = ""
 aliases = {}
 
-
 # Callback for search submodule to set an alias
 aliasCallback = (match) ->
     if match > 0

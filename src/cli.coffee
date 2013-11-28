@@ -20,54 +20,65 @@ parseAlias = (input) ->
 cmd.command('alias <alias> <resource>')
     .description('Create an alias for a Harvest resource. Shortcut: a')
     .option('-t, --type <type>', 'specify the resource type for which to create an alias. Default: project')
-    .action (prog, args, program) ->
-        commands.alias cmd.args[0], cmd.args[1], parseAlias program.type
+    .action (target, query, program) ->
+        commands.alias target, query, parseAlias program.type
 
 
 # Alias listing
 cmd.command('list <resource>')
     .description('Show all aliases for a Harvest resource. Shortcut: la')
-    .action ->
-        commands.aliases parseAlias cmd.args[0]
+    .action (resource) ->
+        commands.aliases parseAlias resource
 
 
 # Summary reporting (range)
 cmd.command('range <fromDate> <toDate>')
     .description('Show logged time for a date range.')
-    .action ->
-        commands.range cmd.args[0], cmd.args[1]
+    .action (from, to) ->
+        commands.range from, to
 
 
 # Summary reporting (single day)
 cmd.command('day [date]')
     .description('Show logged time for a date (default = today). Shortcut: d')
-    .action ->
-        commands.day cmd.args[0]
+    .action (day) ->
+        commands.day day
 
 
 # Summary reporting (week)
 cmd.command('week [date]')
     .description('Show logged time for the week of a date (default = today). Shortcut: w')
-    .action ->
-        commands.week cmd.args[0]
+    .action (day) ->
+        commands.week day
+
+
+# Log time but stop the timer
+cmd.command('log <project> <task> [time] [note]')
+    .description('Create a stopped timer for a given task. Shortcut: l')
+    .action (project, task, time, note) ->
+        taskString = project
+        if taskString.match /\./
+            note = time
+            time = task
+        else
+            taskString += "." + task
+
+        commands.log taskString, time, note
 
 
 # Start time tracking
-#  Project and task can be passed as a single string in dot notation (i.e. project.task) or as two separate arguments. Optionally adding initial time spent to the timer and/or a note.
 cmd.command('start <project> [task] [time] [note]')
     .description('Start a new timer for a given task. Shortcut: s')
-    .action ->
-        taskString = cmd.args[0]
+    .action (project, task, time, note) ->
+        taskString = project
         if taskString.match /\./
-            task = ""
-            time = cmd.args[1]
-            note = cmd.args[2]
+            note = time
+            time = task
         else
-            taskString += "." + cmd.args[1]
-            time = cmd.args[2]
-            note = cmd.args[3]
+            taskString += "." + task
 
         commands.start taskString, time, note
+
 
 # Pause/stop time tracking
 cmd.command('pause')
@@ -80,10 +91,18 @@ cmd.command('pause')
 cmd.command('resume [entry]')
     .description('Restarts the last running timer. Shortcut: r')
     .option('-n, --negative', 'Indicate that the number is negative')
-    .action (args, program) ->
-        index = parseInt(cmd.args[0])
+    .action (entry, program) ->
+        index = parseInt(entry)
         index *= -1 if program.negative?
         commands.resume index
+
+
+# Edit notes for timer
+cmd.command('note [note]')
+    .description('Update the notes for the running timer. Shortcut: n')
+    .action (note) ->
+        commands.note note
+
 
 # The function is executed every time user runs `bin/sow`
 exports.run = ->

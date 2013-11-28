@@ -1,9 +1,9 @@
 # Sow
 
 You can only reap what you sow in any Harvest. For the CLI junkies, waiting for
-a web page to load and react can be frustrating. Sow helps relieve that 
-frustration by making it possible to interact with Harvest without needing to 
-wait on the web UI. Hopefully, this will help you sow faster and reap more in 
+a web page to load and react can be frustrating. Sow helps relieve that
+frustration by making it possible to interact with Harvest without needing to
+wait on the web UI. Hopefully, this will help you sow faster and reap more in
 Harvest!
 
 ## Installation
@@ -13,9 +13,9 @@ Harvest!
 
 ## Usage
 
-Sow focuses on time entry and history. Its aim is to make it easy to do 
+Sow focuses on time entry and history. Its aim is to make it easy to do
 CRUD-like actions on time tracking, and produce some very simple reports all
-from the CLI. Most commands have a shortcut as well to make usage as fast as 
+from the CLI. Most commands have a shortcut as well to make usage as fast as
 possible.
 
 For all date fields, you can use any normal date formats parsed by JavaScript's
@@ -28,10 +28,10 @@ contain spaces must be enclosed in quotation marks.
 
 * alias [a]
 
-    Create an alias for a resource. Aliases can be created for clients, 
-    projects, and tasks. The alias must be unique for its type and cannot 
-    contain dots (.). The client parameter can be either the client ID (if 
-    known) or a string for searching. If multiple matches are found, they will 
+    Create an alias for a resource. Aliases can be created for clients,
+    projects, and tasks. The alias must be unique for its type and cannot
+    contain dots (.). The client parameter can be either the client ID (if
+    known) or a string for searching. If multiple matches are found, they will
     be provided as options from which you can choose the correct client.
 
     Parameters: [--type = project] alias resource
@@ -53,7 +53,10 @@ contain spaces must be enclosed in quotation marks.
 
 * start [s]
 
-    Create a new active timer, optionally adding time to it.
+    Create a new active timer, optionally adding time to it. Project and task
+    can be passed as a single string in dot notation (i.e. project.task) or as
+    two separate arguments. Optionally adding initial time spent to the timer
+    and/or a note.
 
     Parameters: <project>(.| )<task> [time] [comment]
 
@@ -63,10 +66,10 @@ contain spaces must be enclosed in quotation marks.
 
 * resume [r]
 
-    Continue an existing timer. If no parameters are provided, it will be the 
+    Continue an existing timer. If no parameters are provided, it will be the
     last timer ran from sow. If an index is provided (optioanlly using the
     --negative switch to indicate a negative index), the timer will be in that
-    index position (e.g. -n 1 will start the timer before the last one). If a 
+    index position (e.g. -n 1 will start the timer before the last one). If a
     project/task string (with optional comment) is provided, the timer matching
     that combination will be started.
 
@@ -83,7 +86,7 @@ contain spaces must be enclosed in quotation marks.
 
 *  day [d]
 
-    Summary provides, as may be expected, a summary of a day's entries. If a 
+    Summary provides, as may be expected, a summary of a day's entries. If a
     date is not provided, sow will default to today.
 
     Parameters: [date]
