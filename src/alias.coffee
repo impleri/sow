@@ -1,4 +1,4 @@
-# Manage aliases
+# Secondary: alias actions
 'use strict'
 
 harvest = require "./harvest"
@@ -10,11 +10,13 @@ prompt = require "prompt"
 
 timer = harvest.TimeTracking
 config = file.config()
+
+# Variables within this scope
 aliasType = activeAlias = ""
 aliases = {}
 
 # Callback for search submodule to set an alias
-aliasCallback = (match) ->
+setAlias = (match) ->
     if match > 0
         aliases[aliasType] = {} unless aliases[aliasType]
         aliases[aliasType][activeAlias] = match
@@ -22,12 +24,18 @@ aliasCallback = (match) ->
         logger.success "Set #{aliasType} alias for ID #{match} as #{activeAlias}"
 
 
-# Set an alias by fuzzy search query
-exports.set = setAlias = (alias, query, type = "project") ->
+# Output all aliases in a uniform manner
+printAliases = (data) ->
+    for alias, id of data
+        console.log "#{alias}: #{id}"
+    console.log ""
+
+
+# Set an alias by fuzzy search query or ID
+exports.set = (alias, query, type = "project") ->
+    # Make the passed parameters accessible for this scope
     aliasType = type
     activeAlias = alias
-
-    # Read the resource to search
     aliases = file.aliases()
 
     # Check existing aliases
@@ -36,16 +44,19 @@ exports.set = setAlias = (alias, query, type = "project") ->
         process.exit 1
 
     # Search for a match
-    search query, type, aliasCallback
+    search query, type, setAlias
 
 
 # Get a resource ID from a given alias
-exports.get = getAlias = (alias, type = "project") ->
+exports.get = (alias, type = "project") ->
+    # Make the passed parameters accessible for this scope
+    aliases = file.aliases()
+
     # Already have an ID
-    if alias.match /[0-9]+/
+    if alias.match /^[0-9]+$/
         +alias
     else
-        aliases = file.aliases()
+        alias = alias.slice 1 if alias.match /^@.*$/
 
         # Check existing aliases
         if aliases[type] and aliases[type][alias]
@@ -56,15 +67,13 @@ exports.get = getAlias = (alias, type = "project") ->
 
 
 # List all aliases for a resource type
-exports.list = listAliases = (type = false) ->
+exports.list = (type = false) ->
+    # Make the passed parameters accessible for this scope
     aliases = file.aliases()
 
     if type and aliases[type]
-        for alias, id of aliases[type]
-            logger.info "#{alias}: #{id}"
+        printAliases aliases[type]
     else
         for type, details of aliases
-            logger.info "#{harvest.getResourceName type}".bold.blue
-            for alias, id of details
-                logger.info "#{alias}: #{id}"
-            console.log ""
+            console.log "#{harvest.getResourceName type}".bold.blue
+            printAliases details

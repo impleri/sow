@@ -1,14 +1,15 @@
-# Common logic for Harvest
+# Secondary: Harvest wrapper
 'use strict'
 
 harvestClass = require "harvest"
 file = require "./file"
 logger = require "loggy"
 
-config = file.read file.files.config
+config = file.config()
 
-if (!config)
-    logger.err "Configuration is needed"
+if not config.subdomain?
+    logger.error "Configuration is needed"
+    process.exit 1
 
 harvestClass.prototype.getResourceName = (stub) ->
     plural = file.resource stub
@@ -19,4 +20,4 @@ module.exports = new harvestClass
     email: config.email
     password: config.password
 
-module.exports.debug = config.debugHarvest if config.debugHarvest
+module.exports.debug = config.debugHarvest if config.debugHarvest?

@@ -1,4 +1,4 @@
-# Common file to map subfiles to commands
+# Secondary: join modules
 'use strict'
 
 

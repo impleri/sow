@@ -1,4 +1,4 @@
-# Simple reporting of logged tasks for date ranges
+# Primary: show logged tasks
 'use strict'
 
 time = require("./harvest").TimeTracking
@@ -8,6 +8,7 @@ colors = require "colors"
 chrono = require "chrono-node"
 archy = require "archy"
 
+# Variables within this scope
 totalHours = 0.00
 counter = maxCount = 0
 callsComplete = false
@@ -18,7 +19,7 @@ structure =
     nodes: []
 
 # Constructs an object to render in archy
-orderNodes = (client) ->
+insertClient = (client) ->
     clientNodes = []
     for index, project of client.projects
         projectNodes = []
@@ -40,22 +41,23 @@ orderNodes = (client) ->
 # Render the output
 showCompleteLog = ->
     for index, client of entries
-        orderNodes client
+        insertClient client
 
     console.log ""
     console.log archy structure
 
 
-# Helper function to set the root label of the archy structure
+# Set the root label of the archy structure
 setRootLabel = ->
+    end = dates.end.toDateString()
     label = switch calledMethod
-        when "day" then dates.end.toDateString()
-        when "week" then "Week ending #{dates.end.toDateString()}"
-        else "#{dates.start.toDateString()} -- #{dates.end.toDateString()}"
+        when "day" then end
+        when "week" then "Week ending #{end}"
+        else "#{dates.start.toDateString()} -- #{end}"
     structure.label = "#{label.red.bold}: #{totalHours.toFixed(2).red.bold} hours"
 
 
-# Helper callback function to delay rendering until retrieval and parsing are complete
+# Delay rendering until retrieval and parsing are complete
 syncParsing = ->
     counter++
 
@@ -68,27 +70,19 @@ syncParsing = ->
 
 
 # Sorts tasks by client and project
-sortTasks = (entry) ->
+insertEntry = (entry) ->
     client = entry.client
     project = entry.project
     task = entry.task
     time = entry.hours
-    note = entry.notes || "Unnoted"
+    note = entry.notes or "Unnoted"
+    note += " (running)".red.bold if entry.timer_started_at
 
-    if entry.timer_started_at
-        note += " (running)".red.bold
-
-    if (!entries[client])
-        entries[client] = {name: client, total: 0.00, projects: {}}
-
-    if (!entries[client].projects[project])
-        entries[client].projects[project] = {name: project, total: 0.00, tasks: {}}
-
-    if (!entries[client].projects[project].tasks[task])
-        entries[client].projects[project].tasks[task] = {name: task, total: 0.00, notes: {}}
-
-    if (!entries[client].projects[project].tasks[task].notes[note])
-        entries[client].projects[project].tasks[task].notes[note] = {name: note, total: 0.00}
+    # Ensure the structure exists
+    entries[client] = {name: client, total: 0.00, projects: {}} unless entries[client]
+    entries[client].projects[project] = {name: project, total: 0.00, tasks: {}} unless entries[client].projects[project]
+    entries[client].projects[project].tasks[task] = {name: task, total: 0.00, notes: {}} unless entries[client].projects[project].tasks[task]
+    entries[client].projects[project].tasks[task].notes[note] = {name: note, total: 0.00} unless entries[client].projects[project].tasks[task].notes[note]
 
     totalHours += time
     entries[client].total += time
@@ -98,46 +92,38 @@ sortTasks = (entry) ->
 
 
 # Callback to parse data from Harvest and synchronise multiple callouts
-summaryCallback = (err, tasks) ->
-    if err
-        logger.error err
-    else
-        if tasks.day_entries
-            for task in tasks.day_entries
-                sortTasks task
-        syncParsing()
+parseData = (err, tasks) ->
+    logger.error err if err?
+    if tasks.day_entries
+        for task in tasks.day_entries
+            insertEntry task
+    syncParsing()
 
 
 # Dummy callback to prevent duplicating parsing
 dummyCallback = (err, tasks) ->
 
 
-# Small helper to parse a given date
-getDate = (date = false) ->
-    date = "today" unless date
-    chrono.parseDate(date)
-
-
-# Show the logged time entries for a range of dates
-exports.range = dayRange = (from, to) ->
+# Main function to retrieve and output tasks for a range of dates
+dayRange = (from, to) ->
     options = {}
-    d = getDate from
-    end = getDate to
+    d = chrono.parseDate from
+    end = chrono.parseDate to
+    start = new Date d.setDate d.getDate() - 1
 
     if config.debug
         logger.log "Start: #{d.toDateString()}"
         logger.log "End: #{end.toDateString()}"
 
-    start = new Date d.setDate d.getDate() - 1
-    dates = {
+    # Make the dates accessible throughout the scope
+    dates =
         start: start
         end: end
-    }
 
     while start < end
         maxCount++
         options.date = start = new Date start.setDate start.getDate() + 1
-        callback = if maxCount is 1 then summaryCallback else dummyCallback
+        callback = if maxCount is 1 then parseData else dummyCallback
         callsComplete = true if start >= end
         if config.debug
             logger.log "Callouts are complete" if callsComplete
@@ -146,22 +132,26 @@ exports.range = dayRange = (from, to) ->
 
 
 # Show the logged time for a day, defaulting to today
-exports.day = dayDate = (date = false) ->
+exports.day = (date = "today") ->
+    # Set the called method for printing the main label
     calledMethod = "day"
-    d = getDate date
+
+    d = chrono.parseDate date
     dayRange d.toDateString(), d.toDateString()
 
 
 # Show the logged time for an entire week, defaulting to this week
-exports.week = dayWeek = (date = false) ->
-    calledMethod = "week"
+exports.week = (date = "today") ->
     startOfWeek = config.startOfWeek or "Monday"
 
-    date = "today" unless date
+    # Set the called method for printing the main label
+    calledMethod = "week"
+
     date = "#{startOfWeek} before #{date}"
 
-    first = getDate date
+    first = chrono.parseDate date
     last = new Date first.getTime()
     last = new Date last.setDate last.getDate() + 6
     dayRange first.toDateString(), last.toDateString()
 
+exports.range = dayRange

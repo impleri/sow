@@ -1,67 +1,136 @@
-# File actions
+# Utility: file actions
 'use strict'
 
 fs = require "fs"
 logger = require "loggy"
 mkdirp = require "mkdirp"
+harvest = require "./harvest"
 
-# Define main paths
+# System paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
 configPath = "#{configRoot}/.config/sow"
 
-# Define files
-exports.files = files =
+# Static file names
+files =
     config: "config"
     aliases: "aliases"
     history: "history"
 
+# Dynamic file names
+getResource = (type) ->
+    "#{type}s"
+
+# Variables within this scope
+cacheType = ""
+callback = (data) ->
+
+
 # Builds full path for a config file.
 getFilePath = (file) ->
-    configPath + "/#{file}.json"
+    file = files[file] if files[file]?
+    "#{configPath}/#{file}.json"
 
 
 # Wrapper to Node's FS module to save a file, emitting a message on failure.
-exports.save = saveFile = (file, data) ->
+saveFile = (file, data) ->
     toFile = getFilePath file
+    success = true
 
-    fs.writeFile toFile, JSON.stringify(data), (err) ->
-        if err
-            logger.error "There has been an error writing #{getFilePath file}"
-            if config.debug
-                logger.log err.message
-        else
-            if config.debug
-                logger.success "Data saved to #{getFilePath file}"
+    try
+        fs.writeFileSync toFile, JSON.stringify data
+    catch err
+        success = false
+        logger.error "There has been an error writing #{toFile}"
+        if config and config.debug
+            logger.log err.message
 
-    (fs.existsSync file)
+    success
 
 
 # Wrapper to Node's require to read a JSON file, parsing it.
-exports.read = readFile = (file) ->
-    tryFile = getFilePath file
-
+readFile = (file) ->
     try
-        data = require tryFile
+        data = require getFilePath file
     catch err
-        # Don't need to see this message under normal conditions
+        data = {}
+        # Since the file may not exist, this message may be expected
         if config and config.debug
             logger.warn err.message
-        data = {}
 
     return data
 
 
-# Get user config
+# Callback from Harvest API to cache resource list
+saveCache = (err, data) ->
+    logger.error err if err?
+
+    if data
+        now = new Date
+        file = getResource cacheType
+
+        cache =
+            generated: now.toDateString()
+        cache[file] = data
+
+        saveFile file, cache
+        callback cache
+
+
+# Reads a file and polls Harvest for an update if it has expired
+readCache = (type, cb) ->
+    # Make the passed parameters accessible for this scope
+    cacheType = type
+    callback = cb
+
+    # Load the cached file (if it exists)
+    cache = readFile getResource type
+    generatedTime = cache.generated or 0
+    generated = new Date generatedTime
+
+    if config.debug and generatedTime > 0
+            logger.log "Cache for #{type} last updated on #{generated}"
+
+    now = new Date
+    cacheLife = config.cacheLife or 7
+    generated.setDate generated.getDate() + cacheLife
+
+    # Refresh cache if needed
+    if now.getTime() < generated.getTime()
+        cb cache
+    else
+        resource = harvest.getResourceName type
+        if config.debug
+            logger.log "Regenerating cache"
+        harvest[resource].list {}, saveCache
+
+
+# Ensure the system path exists
+mkdirp.sync configPath, "755"
+
+# Try to load the config file for use here if it exists
+config = readFile files.config
+
+
+# Define exports
+exports.path = configPath
+exports.files = files
+exports.resource = getResource
+exports.save = saveFile
+exports.read = readFile
+exports.cache = readCache
+
+
+# Get user-defined config
 exports.config = ->
     readFile files.config
 
 
-# Get user's aliases
+# Get user-defined aliases
 exports.aliases = ->
     readFile files.aliases
 
 
-# Get user's cached activity history
+# Get user's cached activity history for the day
 exports.history = ->
     data = readFile files.history
     lastGenerated = data.generated or 0
@@ -76,15 +145,3 @@ exports.history = ->
             entries: {}
             chrono: []
     data
-
-
-# Helper function to build resource file name
-exports.resource = (type) ->
-    "#{ type }s"
-
-
-# Check to see if we have a config
-config = readFile files.config
-
-# Run and export things
-mkdirp.sync configPath, "755"

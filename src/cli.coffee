@@ -1,9 +1,9 @@
-# Actual CLI interface (Commander)
+# Primary: command-line interface
 'use strict'
 
 cmd = require "commander"
 commands = require './'
-cmd.version(require("../package.json").version)
+cmd.version require("../package.json").version
 
 
 # Helper to parse shorthand resource names for aliasing

@@ -4,7 +4,9 @@ You can only reap what you sow in any Harvest. For the CLI junkies, waiting for
 a web page to load and react can be frustrating. Sow helps relieve that
 frustration by making it possible to interact with Harvest without needing to
 wait on the web UI. Hopefully, this will help you sow faster and reap more in
-Harvest!
+Harvest! Early inspiration came from the original CLI utility for Harvest written
+in Ruby By Zach Hobson, [hcl](https://github.com/zenhob/hcl).
+
 
 ## Installation
 
@@ -24,7 +26,12 @@ Date class. Additionally, you can use any kind of natural language (e.g.
 contain spaces must be enclosed in quotation marks.
 
 
-### Configuration Entry
+
+### Utility Commands
+
+* init
+
+    Guided prompts to create an initial configuration.
 
 * alias [a]
 
@@ -40,7 +47,13 @@ contain spaces must be enclosed in quotation marks.
 
     Shows all aliases for a given resource.
 
-    Parameters: [--type = project] alias resource
+    Parameters: [--type <type>]
+
+* list [ls]
+
+    Shows all items of a given resource.
+
+    Parameters: <type>
 
 
 ### Time Entry
@@ -49,16 +62,23 @@ contain spaces must be enclosed in quotation marks.
 
     Create a new inactive timer.
 
-    Parameters: <project>(.| )<task> <time> [comment]
+    Parameters: <task_string> <time> [comment]
+    <task_string> can take one of three forms:
+        1. project.task
+        2. project task
+        3. task@project
+        In all cases, the project or task can be an alias or an ID.
+    <time> can be given in two different ways:
+        1. [+]HH:MM (e.g. 1:45)
+        2. [+]HH.mm (e.g. +1.75)
+    [comment] must be in quotation marks if it contains a space.
 
 * start [s]
 
-    Create a new active timer, optionally adding time to it. Project and task
-    can be passed as a single string in dot notation (i.e. project.task) or as
-    two separate arguments. Optionally adding initial time spent to the timer
-    and/or a note.
+    Create a new active timer, optionally adding time to it. Optionally adding
+    initial time spent to the timer.
 
-    Parameters: <project>(.| )<task> [time] [comment]
+    Parameters: <task_string> [time] [comment]
 
 * pause [p]
 
@@ -73,7 +93,7 @@ contain spaces must be enclosed in quotation marks.
     project/task string (with optional comment) is provided, the timer matching
     that combination will be started.
 
-    Parameters: [[--negative] [index]] [<project>(.| )<task> [comment]]
+    Parameters: [--negative] [index]
 
 * note [n]
 
@@ -95,13 +115,18 @@ contain spaces must be enclosed in quotation marks.
         $ sow d 2012-12-01   // 01 Dec 2012
         $ sow day 11/11/2011 // 11 Nov 2011
         $ sow d 7.11.2013    // 11 July 2013
+        $ sow day yesterday
+        # sow d "last Tuesday"
 
 * week [w]
 
-    Provides a summary of all entries within a set week. The default date is
-    today. The result will be for the week in which the provided date exists.
+    Provides a summary of all entries within a set week. The result will be for
+    the week in which the provided date exists.
 
     Parameters: [date]
+
+        $ sow week            // This week's entries
+        $ sow w 2012-12-01    // Week of 01 Dec 2012
 
 * range
 
@@ -110,9 +135,14 @@ contain spaces must be enclosed in quotation marks.
     Parameters: <fromDate> <toDate>
 
 
+
 ## Configuration
 
-### startOfWeek
-
-Defines the day on which the week starts. Default is Monday.
-
+subdomain = Harvest subdomain to use
+email = Login email address
+password = User password
+startOfWeek = Day on which the week starts
+cacheLife = Number of days cached data is valid
+matchLimit = Number of matches to display when searching resources
+debug = Debug sow
+debugHarvest = Enable debugging for the Harvest API module
