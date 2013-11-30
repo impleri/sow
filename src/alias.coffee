@@ -3,7 +3,7 @@
 
 harvest = require "./harvest"
 file = require "./file"
-search = require "./search"
+resource = require "./resource"
 logger = require "loggy"
 colors = require "colors"
 prompt = require "prompt"
@@ -44,7 +44,7 @@ exports.set = (alias, query, type = "project") ->
         process.exit 1
 
     # Search for a match
-    search query, type, setAlias
+    resource.search query, type, setAlias
 
 
 # Get a resource ID from a given alias

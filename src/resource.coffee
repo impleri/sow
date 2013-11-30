@@ -1,8 +1,9 @@
-# Utility: Search action
+# Utility: Resource actions
 'use strict'
 
 file = require "./file"
 harvest = require "./harvest"
+alias = require "./alias"
 logger = require "loggy"
 colors = require "colors"
 prompt = require "prompt"
@@ -13,9 +14,10 @@ config = file.config()
 limit = config.matchLimit or 9
 
 # Variables within this scope
-processed = false
+processed = activeOnly = defaultOnly = false
 searchQuery = fileType = ""
 topX = []
+limiters = []
 chosen =
     id: 0
 callback = (match) ->
@@ -46,7 +48,7 @@ promptResponse = (err, result) ->
             callback chosen.id
 
 
-# Main function that performs the search
+# Perform the search
 search = (data) ->
     resourceName = file.resource fileType
 
@@ -84,12 +86,66 @@ search = (data) ->
     callback chosen.id if chosen.id > 0
 
 
-# Central function to search all resources of a type by a query
-module.exports = (query, type, cb) ->
+# Search all resources of a type by a query
+exports.search = (query, type, cb) ->
     # Make the passed parameters accessible for this scope
     searchQuery = query
     fileType = type
     callback = cb
 
-    file.readCache type, search
+    file.cache type, search
 
+
+# List all resources of a type
+list = (data) ->
+    resourceName = file.resource fileType
+
+    if fileType and data[resourceName]
+        for resource in data[resourceName]
+            if not resource[fileType]?
+                if config.debug
+                    logger.warn "Resource is missing #{fileType}", resource
+                continue
+
+            item = resource[fileType]
+            passes = true
+            if limiters.length > 0
+                for limiter in limiters
+                    value = alias.get limiter.value, limiter.type
+                    if not item[limiter.field]? or item[limiter.field] isnt value
+                        if config.debug
+                            logger.warn "#{limiter.field} value of #{item[limiter.field]} does not match #{value}"
+                        passes = false
+
+            if not passes
+                continue
+
+            string = "#{item.id}: #{item.name}"
+            if item.active?
+                active = item.active
+            else
+                active = not item.deactivated
+
+            if item.is_default?
+                is_default = item.is_default
+            else
+                is_default = true
+
+            if active and is_default
+                console.log string.green
+            else if active and not defaultOnly
+                console.log string.yellow
+            else if not activeOnly
+                console.log string.grey.italic
+
+            else # not default and not activeOnly
+
+
+# List all resources of a given type
+exports.list = (type = "project", limits = [], getAll = false, defaults = false) ->
+    fileType = type
+    activeOnly = not getAll
+    defaultOnly = defaults
+    limiters = limits
+
+    file.cache type, list
