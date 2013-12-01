@@ -126,9 +126,18 @@ list = (data) ->
             if not passes
                 continue
 
-            string = "#{item.id}: #{item.name}"
+            string = "#{item.id}: "
+
+            if fileType is "user"
+                string += "#{item.first_name} #{item.last_name}"
+            else
+                string += item.name
+
+
             if item.active?
                 active = item.active
+            else if item.is_active?
+                active = item.is_active
             else
                 active = not item.deactivated
 
