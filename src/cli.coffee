@@ -20,6 +20,21 @@ parseAlias = (input) ->
         else input
 
 
+# Init/Setup
+cmd.command('init')
+    .description('Create the initial configuration.')
+    .option('-s, --subdomain <subdomain>', 'specify the subdomain for your account.')
+    .option('-e, --email <email>', 'specify your email address.')
+    .option('-p, --password <password>', 'specify your account password.')
+    .option('-f, --force', 'skip testing of configuration.')
+    .action (program) ->
+        commands.init
+            subdomain: program.subdomain
+            email: program.email
+            password: program.password
+            force: program.force
+
+
 # Alias creation
 cmd.command('alias <alias> <resource>')
     .description('Create an alias for a Harvest resource. Shortcut: a')
@@ -150,6 +165,7 @@ exports.run = ->
         when 'la' then 'aliases'
         when 'ls' then 'list'
         when 'stop' then 'pause'
+        when 'setup' then 'init'
         else command
 
     args[2] = fullCommand if fullCommand?

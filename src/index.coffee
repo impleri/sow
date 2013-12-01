@@ -1,6 +1,8 @@
 # Secondary: join modules
 'use strict'
 
+exports.init = require "./setup"
+
 alias = require "./alias"
 exports.alias = alias.set
 exports.aliases = alias.list
@@ -19,3 +21,5 @@ exports.pause = timer.pause
 exports.resume = timer.resume
 exports.log = timer.log
 exports.note = timer.note
+
+
