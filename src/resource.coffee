@@ -57,9 +57,13 @@ search = (data) ->
 
         # Do some fuzzy matching
         for resource in data[resourceName]
-            match = fuzzy resource[fileType].name, searchQuery
+            if fileType is "user"
+                name = "#{resource[fileType].first_name} #{resource[fileType].last_name}"
+            else
+                name = resource[fileType].name
+            match = fuzzy name, searchQuery
             match.id = resource[fileType].id
-            matches.push match if match.score > searchQuery.length
+            matches.push match if match.score >= searchQuery.length
 
         # Sort matches in descending order
         matches.sort fuzzy.matchComparator
@@ -77,8 +81,11 @@ search = (data) ->
             prompt.get fileType, promptResponse
 
         # Only one match, so assume it's right
-        else if topX.lentgh is 1
+        else if topX.length is 1
             chosen = topX.shift()
+        else
+            logger.warn "No matches found"
+            process.exit 0
     else
         chosen.id = search
 
