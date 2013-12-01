@@ -37,18 +37,24 @@ cmd.command('aliases')
 
 
 # Resource listing
-cmd.command('list [resource]')
+cmd.command('list [resource] [search]')
     .description('Show all active resources of a type (default = project). Shortcut: ls')
     .option('-a, --all', 'show all (include inactive resources).')
     .option('-d, --default', 'show only default (tasks).')
     .option('-c, --client <client>', 'specify a client alias to limit the listing of tasks.')
-    .action (resource, program) ->
+    .action (resource, search, program) ->
         limits = []
         if program.client
             limits.push {
                 field: 'client_id'
                 type: 'client'
                 value: program.client
+            }
+        if search
+            limits.push {
+                field: 'name'
+                type: 'fuzzy'
+                value: search
             }
         commands.list parseAlias(resource), limits, program.all, program.default
 

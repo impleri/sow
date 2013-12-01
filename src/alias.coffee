@@ -75,5 +75,5 @@ exports.list = (type = false) ->
         printAliases aliases[type]
     else
         for type, details of aliases
-            console.log "#{harvest.getResourceName type}".bold.blue
+            console.log "#{file.getHarvestName type}".bold.blue
             printAliases details

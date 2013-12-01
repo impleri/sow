@@ -2,7 +2,6 @@
 'use strict'
 
 file = require "./file"
-harvest = require "./harvest"
 alias = require "./alias"
 logger = require "loggy"
 colors = require "colors"
@@ -60,7 +59,7 @@ search = (data) ->
         for resource in data[resourceName]
             match = fuzzy resource[fileType].name, searchQuery
             match.id = resource[fileType].id
-            matches.push match if match.score > 3
+            matches.push match if match.score > searchQuery.length
 
         # Sort matches in descending order
         matches.sort fuzzy.matchComparator
@@ -111,11 +110,18 @@ list = (data) ->
             passes = true
             if limiters.length > 0
                 for limiter in limiters
-                    value = alias.get limiter.value, limiter.type
-                    if not item[limiter.field]? or item[limiter.field] isnt value
-                        if config.debug
-                            logger.warn "#{limiter.field} value of #{item[limiter.field]} does not match #{value}"
-                        passes = false
+                    if limiter.type is "fuzzy"
+                        match = fuzzy item[limiter.field], limiter.value
+                        if match.score <= limiter.value.length * 1.5
+                            passes = false
+                        else if config.debug
+                            logger.log "#{limiter.field} score is #{match.score}."
+                    else
+                        value = alias.get limiter.value, limiter.type
+                        if not item[limiter.field]? or item[limiter.field] isnt value
+                            if config.debug
+                                logger.warn "#{limiter.field} value of #{item[limiter.field]} does not match #{value}."
+                            passes = false
 
             if not passes
                 continue

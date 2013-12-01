@@ -4,7 +4,11 @@
 fs = require "fs"
 logger = require "loggy"
 mkdirp = require "mkdirp"
-harvest = require "./harvest"
+
+# Variables within this scope
+cacheType = ""
+callback = (data) ->
+
 
 # System paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
@@ -16,13 +20,19 @@ files =
     aliases: "aliases"
     history: "history"
 
+
 # Dynamic file names
 getResource = (type) ->
-    "#{type}s"
+    if type is "user" or type is "people"
+        "people"
+    else
+        "#{type}s"
 
-# Variables within this scope
-cacheType = ""
-callback = (data) ->
+
+# Map resource type here to Harvest API
+getHarvestName = (stub) ->
+    plural = getResource stub
+    plural[0].toUpperCase() + plural.slice 1
 
 
 # Builds full path for a config file.
@@ -98,9 +108,11 @@ readCache = (type, cb) ->
     if now.getTime() < generated.getTime()
         cb cache
     else
-        resource = harvest.getResourceName type
+        resource = getHarvestName type
         if config.debug
             logger.log "Regenerating cache"
+        # require this late so that it can get the config before being loaded
+        harvest = require "./harvest"
         harvest[resource].list {}, saveCache
 
 
@@ -118,6 +130,7 @@ exports.resource = getResource
 exports.save = saveFile
 exports.read = readFile
 exports.cache = readCache
+exports.getHarvestName = getHarvestName
 
 
 # Get user-defined config
@@ -145,3 +158,4 @@ exports.history = ->
             entries: {}
             chrono: []
     data
+
