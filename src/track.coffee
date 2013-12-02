@@ -186,6 +186,7 @@ exports.log = (task, time = "", note = "") ->
 exports.start = (task, time = "", note = "") ->
     options = parseOptions task, time, note
     cb = trackHistory
+    messageType = "start"
     cb = startTimer if time.match /^\+?\d+(\.|:)\d+$/
     timer.create options, cb
 
@@ -197,7 +198,7 @@ exports.pause = ->
 
 # Resume a stopped timer
 exports.resume = (entry) ->
-    task = getHistoryEntry entry if entry else file.history().chrono.pop()
+    task = if not entry then file.history().chrono.pop() else getHistoryEntry entry
     checkTimer task, startTimer
 
 
