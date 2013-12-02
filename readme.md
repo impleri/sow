@@ -100,13 +100,13 @@ right format. Most time entry commands take a few common parameters.
 
  - task_string identifies the project and task for the command. It can take one
  of three forms:
-   1. project.task
-   2. project task
-   3. task@project
+  1. project.task
+  2. project task
+  3. task@project
  In all cases, the project or task can be an alias or an ID.
  - time identifies time spent. It can be given in two different ways:
-   1. Time-based:   HH:MM (e.g. 1:45)
-   2. Decimal-baed: HH.mm (e.g. +1.75)
+  1. Time-based:   HH:MM (e.g. 1:45)
+  2. Decimal-baed: HH.mm (e.g. +1.75)
  In either case, an optional plus sign [+] can be prepended for readability.
  - comment provides a task commend. It must be in quotation marks if there is a
  space (e.g. example is fine without quotations marks, but "example thought
