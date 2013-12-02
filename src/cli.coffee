@@ -36,9 +36,9 @@ cmd.command('init')
 
 
 # Alias creation
-cmd.command('alias <alias> <resource>')
+cmd.command('alias <alias> <target_resource>')
     .description('Create an alias for a Harvest resource. Shortcut: a')
-    .option('-t, --type <type>', 'specify the resource type for which to create an alias. Default: project')
+    .option('-t, --type <resource_type>', 'specify the resource type for which to create an alias. Default: project')
     .action (target, query, program) ->
         commands.alias target, query, parseAlias program.type
 
@@ -46,18 +46,18 @@ cmd.command('alias <alias> <resource>')
 # Alias listing
 cmd.command('aliases')
     .description('Show all aliases for a Harvest resource. Shortcut: la')
-    .option('-t, --type <type>', 'specify the resource type for limiting the listing. Default: project')
+    .option('-t, --type <resource_type>', 'specify the resource type for limiting the listing. Default: project')
     .action (program) ->
         commands.aliases parseAlias program.type
 
 
 # Resource listing
-cmd.command('list [resource] [search]')
+cmd.command('list [search]')
     .description('Show all active resources of a type (default = project). Shortcut: ls')
+    .option('-t, --type <resource_type>', 'specify the resource type for limiting the listing. Default: project')
     .option('-a, --all', 'show all (include inactive resources).')
-    .option('-d, --default', 'show only default (tasks).')
     .option('-c, --client <client>', 'specify a client alias to limit the listing of tasks.')
-    .action (resource, search, program) ->
+    .action (search, program) ->
         limits = []
         if program.client
             limits.push {
@@ -71,11 +71,11 @@ cmd.command('list [resource] [search]')
                 type: 'fuzzy'
                 value: search
             }
-        commands.list parseAlias(resource), limits, program.all, program.default
+        commands.list parseAlias(program.type), limits, program.all
 
 
 # Summary reporting (range)
-cmd.command('range <fromDate> <toDate>')
+cmd.command('range <from_date> <to_date>')
     .description('Show logged time for a date range.')
     .action (from, to) ->
         commands.range from, to
@@ -131,10 +131,10 @@ cmd.command('pause')
 
 
 # Resume time tracking
-cmd.command('resume [entry]')
-    .description('Restarts the last running timer. Shortcut: r')
+cmd.command('resume [entry] [task] [note]')
+    .description('Restarts an existing timer. Shortcut: r')
     .option('-n, --negative', 'Indicate that the number is negative')
-    .action (entry, program) ->
+    .action (entry, task, note, program) ->
         index = parseInt(entry)
         index *= -1 if program.negative?
         commands.resume index

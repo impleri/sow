@@ -155,7 +155,7 @@ list = (data) ->
 
             if active and is_default
                 console.log string.green
-            else if active and not defaultOnly
+            else if active and not activeOnly
                 console.log string.yellow
             else if not activeOnly
                 console.log string.grey.italic
