@@ -31,12 +31,12 @@ CLI. Most commands have a shortcut as well to make usage as fast as possible.
 
 * init
 
-Guided prompts to create an initial configuration. For the optimist, the base
-config items can be passed as options. Unless --force is used, this will test
-the settings and prompt in the case of a failure. Can also be called using the
-`setup` command.
+ Guided prompts to create an initial configuration. For the optimist, the base
+ config items can be passed as options. Unless --force is used, this will test
+ the settings and prompt in the case of a failure. Can also be called using the
+ `setup` command.
 
-Parameters: [--subdomain <subdomain>] [--email <email_address>] [--password <password>] [--force]
+ Parameters: [--subdomain <subdomain>] [--email <email_address>] [--password <password>] [--force]
 
 
 
@@ -100,14 +100,14 @@ right format. Most time entry commands take a few common parameters.
 
  - task_string identifies the project and task for the command. It can take one
  of three forms:
-   1. <project>.<task>
-   2. <project> <task>
-   3. <task>@<project>
-   In all cases, the project or task can be an alias or an ID.
+   1. project.task
+   2. project task
+   3. task@project
+ In all cases, the project or task can be an alias or an ID.
  - time identifies time spent. It can be given in two different ways:
    1. Time-based:   HH:MM (e.g. 1:45)
    2. Decimal-baed: HH.mm (e.g. +1.75)
-   In either case, an optional plus sign [+] can be prepended for readability.
+ In either case, an optional plus sign [+] can be prepended for readability.
  - comment provides a task commend. It must be in quotation marks if there is a
  space (e.g. example is fine without quotations marks, but "example thought
  here" requires them).
@@ -177,11 +177,11 @@ right format. Most time entry commands take a few common parameters.
  specific date. Sow uses the excellent [chrono](https://github.com/wanasit/chrono)
  package to parse the date string. Some examples of valid date strings include:
 
-     - 2012-12-01
-     - 11/11/2011
-     - 7.11.2013
-     - Yesterday
-     - "Last Tuesday"
+  - 2012-12-01
+  - 11/11/2011
+  - 7.11.2013
+  - Yesterday
+  - "Last Tuesday"
 
 
 *  day [d]
@@ -194,7 +194,7 @@ right format. Most time entry commands take a few common parameters.
         $ sow day            // Today's entries
         $ sow d 2012-12-01   // 01 Dec 2012
         $ sow day yesterday
-        # sow d "last Tuesday"
+        $ sow d "last Tuesday"
 
 
 * week [w]
@@ -212,7 +212,7 @@ right format. Most time entry commands take a few common parameters.
 
  Provides a summary of all entries within a range of dates.
 
- Parameters: <from_date> <to_date>
+ Parameters: from_date to_date
 
 
 
