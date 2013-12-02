@@ -46,10 +46,10 @@ Harvest provides multiple resources, with the primary ones being clients,
 projects, tasks, and users. All resource commands have an option to select the
 resource type: --type. These can be either singular or plural or even a single
 letter. Valid Resource types are:
- A. Project (project, projects, p) [default]
- B. Client (client, clients, c)
- C. Task (task, tasks, t)
- D. User (user, users, u)
+ 1. Project (project, projects, p) [default]
+ 2. Client (client, clients, c)
+ 3. Task (task, tasks, t)
+ 4. User (user, users, u)
 
 
 * alias [a]
