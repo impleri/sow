@@ -147,7 +147,9 @@ exports.week = (date = "today") ->
     # Set the called method for printing the main label
     calledMethod = "week"
 
-    date = "#{startOfWeek} before #{date}"
+    given = chrono.parseDate date
+
+    date = "#{startOfWeek} before #{given.toDateString()}"
 
     first = chrono.parseDate date
     last = new Date first.getTime()

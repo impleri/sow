@@ -60,17 +60,15 @@ cmd.command('list [search]')
     .action (search, program) ->
         limits = []
         if program.client
-            limits.push {
+            limits.push
                 field: 'client_id'
                 type: 'client'
                 value: program.client
-            }
         if search
-            limits.push {
+            limits.push
                 field: 'name'
                 type: 'fuzzy'
                 value: search
-            }
         commands.list parseAlias(program.type), limits, program.all
 
 
@@ -100,7 +98,10 @@ cmd.command('log <project> <task> [time] [note]')
     .description('Create a stopped timer for a given task. Shortcut: l')
     .action (project, task, time, note) ->
         taskString = project
-        if taskString.match /\./
+        matches = taskString.match /^@?([^@])+@([^@])$/
+        if matches
+            taskString = matches[1] + "." + matches[0]
+        if taskString.test /\./
             note = time
             time = task
         else
@@ -114,7 +115,7 @@ cmd.command('start <project> [task] [time] [note]')
     .description('Start a new timer for a given task. Shortcut: s')
     .action (project, task, time, note) ->
         taskString = project
-        if taskString.match /\./
+        if taskString.test /\./
             note = time
             time = task
         else

@@ -17,6 +17,7 @@ sendNotice = (err, data) ->
     if err
         logger.error err
     else
+        trackHistory data
         message = switch messageType
             when "stop" then "Stopped timer for #{data.task} in #{data.project} (#{data.client}). #{data.hours} hours logged."
             when "log" then "Logged #{data.hours} hours for #{data.task} in #{data.project} (#{data.client})."
@@ -50,7 +51,7 @@ updateTimer = (err, data) ->
     logger.error err if err
     messageType = "update"
     data.notes = updateNote
-    timer.update data, noticeUpdate if data.timer_started_at?
+    timer.update data, sendNotice if data.timer_started_at?
 
 
 # Gets the time entry before triggering an actual action
@@ -63,33 +64,29 @@ checkTimer = (entry, cb) ->
 
 
 # Add timer to the cache history for resume
-trackHistory = (err, data) ->
-    if err
-        logger.error err
-    else
-        history = file.history()
+trackHistory = (data) ->
+    history = file.history()
 
-        # Ensure history structure exists
-        history.entries[data.project_id] = {} unless history.entries[data.project_id]
-        history.entries[data.project_id][data.task_id] = {} unless history.entries[data.project_id][data.task_id]
+    # Ensure history structure exists
+    history.entries[data.project_id] = {} unless history.entries[data.project_id]
+    history.entries[data.project_id][data.task_id] = [] unless history.entries[data.project_id][data.task_id]
 
-        # Add a new entry to the named history
-        hash = crypto.createHash("md5").update(data.id + data.notes).digest "hex"
-        history.entries[data.project_id][data.task_id][hash] = data.id unless history.entries[data.project_id][data.task_id][hash]
+    # Add a new entry to the named history
+    hash = crypto.createHash("md5").update(data.notes.toLowerCase).digest "hex"
+    history.entries[data.project_id][data.task_id][hash] = data unless history.entries[data.project_id][data.task_id][hash]
 
-        # Add a new entry to the queue history
-        last = history.chrono.pop()
-        history.chrono.push last
-        if last isnt data.id
-            history.chrono.push data.id
+    # Add a new entry to the queue history
+    last = history.chrono.pop()
+    history.chrono.push last
+    if last isnt data.id
+        history.chrono.push data.id
 
-        # Remove first entry if null
-        first = history.chrono.shift()
-        history.chrono.unshift first if first?
+    # Remove first entry if null
+    first = history.chrono.shift()
+    history.chrono.unshift first if first?
 
-        # Save the file
-        file.save file.files.history, history
-        sendNotice null, data
+    # Save the file
+    file.save file.files.history, history
 
 
 # Create the timestamp Harvest expects for spent_at
@@ -161,7 +158,7 @@ parseOptions = (taskString, time = "", note = "") ->
 
 
 # Find the entry in cached history
-getHistoryEntry = (entry) ->
+getHistoryEntry = (entry, note) ->
     history = file.history()
     end = history.chrono.length
 
@@ -171,7 +168,16 @@ getHistoryEntry = (entry) ->
     else if entry < end
         match = history.chrono[entry-1...entry].pop()
     else
-        match = history.chrono.pop()
+        details = parseOptions entry, note
+
+        if history.entries[details.project_id]? and history.entries[details.project_id][details.task_id]?
+            hash = crypto.createHash("md5").update(data.notes.toLowerCase).digest "hex"
+            item = if history.entries[details.project_id][details.task_id][hash]? then history.entries[details.project_id][details.task_id][hash] else history.entries[details.project_id][details.task_id].pop()
+        else
+            item = history.chrono.pop()
+
+        match = item.id if item?
+
     match
 
 
@@ -185,10 +191,7 @@ exports.log = (task, time = "", note = "") ->
 # Start a new timer
 exports.start = (task, time = "", note = "") ->
     options = parseOptions task, time, note
-    cb = trackHistory
-    messageType = "start"
-    cb = startTimer if time.match /^\+?\d+(\.|:)\d+$/
-    timer.create options, cb
+    timer.create options, startTimer
 
 
 # Pause the running timer
@@ -197,8 +200,8 @@ exports.pause = ->
 
 
 # Resume a stopped timer
-exports.resume = (entry) ->
-    task = if not entry then file.history().chrono.pop() else getHistoryEntry entry
+exports.resume = (entry, note = "") ->
+    task = if not entry then file.history().chrono.pop() else getHistoryEntry entry, note
     checkTimer task, startTimer
 
 
