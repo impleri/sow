@@ -19,10 +19,10 @@ sendNotice = (err, data) ->
     else
         trackHistory data
         message = switch messageType
-            when "stop" then "Stopped timer for #{data.task} in #{data.project} (#{data.client}). #{data.hours} hours logged."
             when "log" then "Logged #{data.hours} hours for #{data.task} in #{data.project} (#{data.client})."
-            when "update" then "Updated notes for #{data.task} in #{data.project} (#{data.client}) to #{data.notes}."
             when "start" then "Started timer for #{data.task} in #{data.project} (#{data.client})."
+            when "stop" then "Stopped timer for #{data.task} in #{data.project} (#{data.client}). #{data.hours} hours logged."
+            when "update" then "Updated notes for #{data.task} in #{data.project} (#{data.client}) to #{data.notes}."
             else "Complete"
 
         if messageType = "start" and data.hours > 0
@@ -69,11 +69,13 @@ trackHistory = (data) ->
 
     # Ensure history structure exists
     history.entries[data.project_id] = {} unless history.entries[data.project_id]
-    history.entries[data.project_id][data.task_id] = [] unless history.entries[data.project_id][data.task_id]
+    history.entries[data.project_id][data.task_id] = {items: []} unless history.entries[data.project_id][data.task_id]
 
     # Add a new entry to the named history
-    hash = crypto.createHash("md5").update(data.notes.toLowerCase).digest "hex"
-    history.entries[data.project_id][data.task_id][hash] = data unless history.entries[data.project_id][data.task_id][hash]
+    hashString = if data.notes then data.notes.toLowerCase() else "unnoted"
+    if not history.entries[data.project_id][data.task_id][hashString]?
+        history.entries[data.project_id][data.task_id][hashString] = data
+        history.entries[data.project_id][data.task_id].items.push data
 
     # Add a new entry to the queue history
     last = history.chrono.pop()
@@ -86,6 +88,8 @@ trackHistory = (data) ->
     history.chrono.unshift first if first?
 
     # Save the file
+    if config.debug
+        logger.log "Writing history", history
     file.save file.files.history, history
 
 
@@ -161,22 +165,32 @@ parseOptions = (taskString, time = "", note = "") ->
 getHistoryEntry = (entry, note) ->
     history = file.history()
     end = history.chrono.length
+    match = false
 
-    if entry < 0 <= end - entry
-        index = end + entry
-        match = history.chrono[index-1...index].pop()
-    else if entry < end
-        match = history.chrono[entry-1...entry].pop()
-    else
+    if typeof entry is "number"
+        if config.debug
+            "Number entry is #{entry}"
+        if entry < 0 <= end - entry
+            index = end + entry
+            match = history.chrono[index-1...index].pop()
+        else if entry < end
+            match = history.chrono[entry-1...entry].pop()
+    else if typeof entry is "string"
         details = parseOptions entry, note
 
-        if history.entries[details.project_id]? and history.entries[details.project_id][details.task_id]?
-            hash = crypto.createHash("md5").update(data.notes.toLowerCase).digest "hex"
-            item = if history.entries[details.project_id][details.task_id][hash]? then history.entries[details.project_id][details.task_id][hash] else history.entries[details.project_id][details.task_id].pop()
-        else
-            item = history.chrono.pop()
+        if config.debug
+            logger.log "Parsed string", details
 
-        match = item.id if item?
+        if history.entries[details.project_id] and history.entries[details.project_id][details.task_id]
+            hash = details.notes.toLowerCase()
+            if config.debug
+                logger.log "Looking in entries for #{hash}"
+                logger.log history.entries[details.project_id][details.task_id][hash]
+            item = if history.entries[details.project_id][details.task_id][hash]? then history.entries[details.project_id][details.task_id][hash] else history.entries[details.project_id][details.task_id].items.pop()
+            match = item.id if item?
+        
+    if not match
+        item = history.chrono.pop()
 
     match
 
@@ -191,7 +205,8 @@ exports.log = (task, time = "", note = "") ->
 # Start a new timer
 exports.start = (task, time = "", note = "") ->
     options = parseOptions task, time, note
-    timer.create options, startTimer
+    messageType = "start"
+    timer.create options, sendNotice
 
 
 # Pause the running timer

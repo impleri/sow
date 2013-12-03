@@ -101,7 +101,7 @@ cmd.command('log <project> <task> [time] [note]')
         matches = taskString.match /^@?([^@])+@([^@])$/
         if matches
             taskString = matches[1] + "." + matches[0]
-        if taskString.test /\./
+        if taskString.match /\./
             note = time
             time = task
         else
@@ -115,7 +115,7 @@ cmd.command('start <project> [task] [time] [note]')
     .description('Start a new timer for a given task. Shortcut: s')
     .action (project, task, time, note) ->
         taskString = project
-        if taskString.test /\./
+        if taskString.match /\./
             note = time
             time = task
         else
@@ -137,8 +137,16 @@ cmd.command('resume [entry] [task] [note]')
     .option('-n, --negative', 'Indicate that the number is negative')
     .action (entry, task, note, program) ->
         index = parseInt(entry)
-        index *= -1 if program.negative?
-        commands.resume index
+        if not isNaN index 
+            index *= -1 if program.negative?
+        else
+            if entry.match /\./
+                note = task
+            else
+                entry += "." + task
+            index = entry
+
+        commands.resume index, note
 
 
 # Edit notes for timer

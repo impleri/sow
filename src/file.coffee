@@ -151,11 +151,12 @@ exports.history = ->
     now = new Date
     now.setHours 0, 0, 0, 0
 
-    # Refresh cache if needed
+    # Clear cache if needed
     if not Object.keys(data).length or now.getTime() isnt generated.getTime()
         data =
             generated: now.getTime()
             entries: {}
             chrono: []
+
     data
 
