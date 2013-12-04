@@ -19,6 +19,16 @@ parseAlias = (input) ->
         when 'users' then 'user'
         else input
 
+# Helper to parse the project/task string
+parseTask = (project, task = "") ->
+    taskString = project
+    matches = taskString.match /^@?([^@]+)@([^@]+)$/
+    if matches
+        taskString = matches[2] + "." + matches[1]
+    else
+        taskString += "." + task
+    taskString
+
 
 # Init/Setup
 cmd.command('init')
@@ -97,15 +107,10 @@ cmd.command('week [date]')
 cmd.command('log <project> <task> [time] [note]')
     .description('Create a stopped timer for a given task. Shortcut: l')
     .action (project, task, time, note) ->
-        taskString = project
-        matches = taskString.match /^@?([^@])+@([^@])$/
-        if matches
-            taskString = matches[1] + "." + matches[0]
-        if taskString.match /\./
+        taskString = parseTask project, task
+        if project.match /\./
             note = time
             time = task
-        else
-            taskString += "." + task
 
         commands.log taskString, time, note
 
@@ -114,12 +119,10 @@ cmd.command('log <project> <task> [time] [note]')
 cmd.command('start <project> [task] [time] [note]')
     .description('Start a new timer for a given task. Shortcut: s')
     .action (project, task, time, note) ->
-        taskString = project
-        if taskString.match /\./
+        taskString = parseTask project, task
+        if project.match /\./
             note = time
             time = task
-        else
-            taskString += "." + task
 
         commands.start taskString, time, note
 
@@ -137,14 +140,12 @@ cmd.command('resume [entry] [task] [note]')
     .option('-n, --negative', 'Indicate that the number is negative')
     .action (entry, task, note, program) ->
         index = parseInt(entry)
-        if not isNaN index 
+        if not isNaN index
             index *= -1 if program.negative?
         else
+            index = parseTask entry, task
             if entry.match /\./
                 note = task
-            else
-                entry += "." + task
-            index = entry
 
         commands.resume index, note
 
