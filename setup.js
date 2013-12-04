@@ -67,7 +67,6 @@ var compileCoffee = function () {
                 src: ["src/hashbang.txt", "build/sow.js"],
                 dest: "bin/sow"
             });
-            fs.chmodSync("bin/sow", "755");
         });
     });
 };
