@@ -1,7 +1,7 @@
 {
     "name": "sow",
     "description": "Harvest CLI tool using node.js.",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "homepage": "https://github.com/impleri/sow",
     "keywords": [
         "harvest",
@@ -28,7 +28,6 @@
     },
     "scripts": {
         "prepublish": "node setup.js prepublish",
-        "postpublish": "node setup.js postpublish",
         "test": "node setup.js test"
     },
     "dependencies": {
