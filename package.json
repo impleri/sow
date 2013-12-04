@@ -1,18 +1,54 @@
 {
-  "name": "Sow",
-  "description": "A command-line script for accessing a Harvest account.",
-  "version": "0.0.1",
-  "author": "Christopher Roussel",
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "engines": {
-    "node": "~0.8"
-  },
-  "dependencies": {
-    "harvestapp": "0.1.0-6"
-  },
-  "devDependencies": {}
+    "name": "sow",
+    "description": "Harvest CLI tool using node.js.",
+    "version": "0.3.0",
+    "homepage": "https://github.com/impleri/sow",
+    "keywords": [
+        "harvest",
+        "harvestapp",
+        "cli",
+        "time"
+    ],
+    "author": {
+        "name": "Christopher Roussel",
+        "email": "christopher@impleri.net"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com/impleri/sow.git"
+    },
+    "bugs": {
+        "url": "https://github.com/impleri/sow/issues"
+    },
+    "license": "BSD",
+    "preferGlobal": true,
+    "main": "./build/index",
+    "bin": {
+        "sow": "./bin/sow.js"
+    },
+    "scripts": {
+        "prepublish": "node setup.js prepublish",
+        "postpublish": "node setup.js postpublish",
+        "test": "node setup.js test"
+    },
+    "dependencies": {
+        "coffee-script": "~1.6",
+        "harvest": "impleri/node-harvest",
+        "commander": "~2.0",
+        "oauth": "~0.9",
+        "loggy": "~0.2",
+        "colors": "~0.6",
+        "prompt": "~0.2",
+        "chrono-node": "~0.1",
+        "archy": "~0.0",
+        "mkdirp": "~0.3",
+        "fuzzy.js": "~0.0"
+    },
+    "devDependencies": {
+        "mocha": "~1.14",
+        "chai": "~1.8",
+        "rewire": "~1.1"
+    },
+    "readmeFilename": "readme.md",
+    "readme": "# Sow\n\nYou can only reap what you sow in any Harvest."
 }
