@@ -6,11 +6,6 @@ harvestClass = require "harvest"
 logger = require "loggy"
 
 config = file.config()
-
-if not config.subdomain
-    logger.error "Configuration is needed"
-    process.exit 1
-
 module.exports = new harvestClass
     subdomain: config.subdomain
     email: config.email

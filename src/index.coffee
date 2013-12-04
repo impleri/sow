@@ -1,25 +1,28 @@
 # Secondary: join modules
 'use strict'
 
+
 exports.init = require "./setup"
 
-alias = require "./alias"
-exports.alias = alias.set
-exports.aliases = alias.list
+file = require "./file"
+config = file.config()
 
-resource = require "./resource"
-exports.list = resource.list
+if config.subdomain
+    alias = require "./alias"
+    exports.alias = alias.set
+    exports.aliases = alias.list
 
-summary = require "./summary"
-exports.day = summary.day
-exports.range = summary.range
-exports.week = summary.week
+    resource = require "./resource"
+    exports.list = resource.list
 
-timer = require "./track"
-exports.start = timer.start
-exports.pause = timer.pause
-exports.resume = timer.resume
-exports.log = timer.log
-exports.note = timer.note
+    summary = require "./summary"
+    exports.day = summary.day
+    exports.range = summary.range
+    exports.week = summary.week
 
-
+    timer = require "./track"
+    exports.start = timer.start
+    exports.pause = timer.pause
+    exports.resume = timer.resume
+    exports.log = timer.log
+    exports.note = timer.note
