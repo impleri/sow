@@ -20,7 +20,10 @@ parseAlias = (input) ->
         else input
 
 # Helper to parse the project/task string
-parseTask = (project, task = "") ->
+parseTask = (project = "", task = "") ->
+    if not project.length
+        ""
+
     taskString = project
     matches = taskString.match /^@?([^@]+)@([^@]+)$/
     if matches
@@ -144,7 +147,7 @@ cmd.command('resume [entry] [task] [note]')
             index *= -1 if program.negative?
         else
             index = parseTask entry, task
-            if entry.match /\./
+            if entry and entry.match /\./
                 note = task
 
         commands.resume index, note

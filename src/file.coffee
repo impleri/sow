@@ -8,7 +8,7 @@ mkdirp = require "mkdirp"
 # Variables within this scope
 cacheType = ""
 callback = (data) ->
-
+historyData = {}
 
 # System paths
 configRoot = process.env.HOME or process.env.USERPROFILE or process.env.HOMEPATH
@@ -48,6 +48,8 @@ saveFile = (file, data) ->
 
     try
         fs.writeFileSync toFile, JSON.stringify data
+        if file is "history"
+            historyData = data
     catch err
         success = false
         logger.error "There has been an error writing #{toFile}"
@@ -59,13 +61,12 @@ saveFile = (file, data) ->
 
 # Wrapper to Node's require to read a JSON file, parsing it.
 readFile = (file) ->
-    try
-        data = require getFilePath file
-    catch err
+    path = getFilePath file
+    if fs.existsSync path
+        initial = fs.readFileSync path
+        data = JSON.parse initial
+    else
         data = {}
-        # Since the file may not exist, this message may be expected
-        if config and config.debug
-            logger.warn err.message
 
     return data
 
@@ -145,18 +146,22 @@ exports.aliases = ->
 
 # Get user's cached activity history for the day
 exports.history = ->
-    data = readFile files.history
-    lastGenerated = data.generated or 0
-    generated = new Date lastGenerated
-    now = new Date
-    now.setHours 0, 0, 0, 0
+    if not historyData.generated
+        if config.debug
+            logger.log "Loading history from file"
+        data = readFile files.history
+        lastGenerated = data.generated or 0
+        generated = new Date lastGenerated
+        now = new Date
+        now.setHours 0, 0, 0, 0
 
-    # Clear cache if needed
-    if not Object.keys(data).length or now.getTime() isnt generated.getTime()
-        data =
-            generated: now.getTime()
-            entries: {}
-            chrono: []
+        # Clear cache if needed
+        if not Object.keys(data).length or now.getTime() isnt generated.getTime()
+            data =
+                generated: now.getTime()
+                entries: {}
+                chrono: []
 
-    data
+        historyData = data
+    historyData
 

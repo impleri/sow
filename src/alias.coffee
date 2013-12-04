@@ -55,7 +55,7 @@ exports.get = (alias, type = "project") ->
     # Already have an ID
     if alias.match /^[0-9]+$/
         +alias
-    else
+    else if alias
         alias = alias.slice 1 if alias.match /^@.*$/
 
         # Check existing aliases
@@ -64,6 +64,8 @@ exports.get = (alias, type = "project") ->
         else
             logger.error "No #{type} alias found for #{alias}"
             process.exit 1
+    else
+        false
 
 
 # List all aliases for a resource type
