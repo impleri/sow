@@ -96,25 +96,23 @@ class Resource
     # list all resources
     list: (limits = [], getAll = false, defaults = false) ->
         if @items
-        for resource in @items
+        for item in @items
             passes = true
             if limits.length > 0
-                for limiter in limits
-                    if limiter.type is "fuzzy"
-                        match = fuzzy item[limiter.field], limiter.value
-                        if match.score <= limiter.value.length * 1.5
+                for limit in limits
+                    if limit.type is "fuzzy"
+                        match = fuzzy item[limit.field], limit.value
+                        if match.score <= limit.value.length * 1.5
                             passes = false
                         else if config.debug
-                            logger.log "#{limiter.field} score is #{match.score}."
+                            logger.log "#{limit.field} score is #{match.score}."
                     else
-                        value = alias.get limiter.value, limiter.type
-                        if not item[limiter.field]? or item[limiter.field] isnt value
-                            if config.debug
-                                logger.warn "#{limiter.field} value of #{item[limiter.field]} does not match #{value}."
+                        value = @readAlias limit.value, true
+                        if not item[limit.field]? or item[limit.field] isnt value
+                            logger.warn "#{limit.field} value of #{item[limit.field]} does not match #{value}." if config.debug
                             passes = false
 
-            if not passes
-                continue
+            continue unless passes
 
             string = "#{item.id}: "
 
