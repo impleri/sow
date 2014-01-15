@@ -1,4 +1,4 @@
-# Secondary: Base resource class
+# Secondary: Base resource class (for clients, users, projects, and tasks)
 'use strict'
 
 # External modules
@@ -18,7 +18,7 @@ config = file.config()
 prompt.delimiter = " "
 prompt.message = "Select".cyan
 
-class Resource
+modules.export = class PrimaryResource
     # The resource type
     name: ""
 
@@ -98,6 +98,52 @@ class Resource
     formatName: (row) ->
         row.name
 
+    # Helper for filtering a row according to criteria
+    filterRow: (row, filters) ->
+        passes = true
+        if limits.length > 0
+            for limit in limits
+                method = "filterRow" + limit.type.toUpperCase() + limit.type.slice 1
+                method = "filterRowValue" unless this[method]?
+                passes = this[method] row, limit
+        passes
+
+    # Helper for testing a row's field matches a given value exactly
+    filterRowValue: (item, limit) ->
+        passes = true
+        passes = false unless item[limit.field]? and item[limit.field] is value
+        logger.warn "#{limit.field} value of #{item[limit.field]} does not match #{value}." if config.debug and not passes
+        passes
+
+    # Helper for testing a row's field (should be ID) matches an alias's ID exactly
+    filterRowAlias: (item, limit) ->
+        limit.value = @alias limit.value, true
+        @filterRowValue item, value
+
+    # Helper for testing a row's field matches a given value by a fuzzy search
+    filterRowFuzzy: (item, limit, returnMatch = false) ->
+        value = item[limit.field]
+        value = @formatName item if limit.field is "name"
+        match = fuzzy value, limit.value
+        minScore = config.score or 1.5
+        logger.log "#{limit.field} score is #{match.score}." if config.debug
+
+        # Give the whole match object back if requested
+        match if returnMatch
+
+        # else return a simple boolean
+        passes = true
+        passes = false if match.score <= limit.value.length * minScore
+        passes
+
+    # Helper for testing a row is marked as active
+    filterRowActive: (item, limit) ->
+        item.active if limit.value else not item.active
+
+    # Helper for testing a row is marked as a default
+    filterRowDefault: (item, limit) ->
+        item.is_default if limit.value else not item.is_default
+
     # Create a resource in Harvest
     create: ->
 
@@ -113,36 +159,22 @@ class Resource
     # list all resources
     list: (limits = [], show = "all") ->
         for item in @data.items
-            passes = true
-            if limits.length > 0
-                for limit in limits
-                    if limit.type is "fuzzy"
-                        match = fuzzy item[limit.field], limit.value
-                        minScore = config.score or 1.5
-                        passes = false if match.score <= limit.value.length * minScore
-                        logger.log "#{limit.field} score is #{match.score}." if config.debug
-                    else
-                        value = @alias limit.value, true
-                        passes = false unless item[limit.field]? and item[limit.field] is value
-                        logger.warn "#{limit.field} value of #{item[limit.field]} does not match #{value}." if config.debug and not passes
+            passes = filterRow item[@name], limits
 
-            # if item doesn't pass the filter, don't show it
-            continue unless passes
-
-            string = "#{item.id}: " + @formatName item.name
-            active = not item.deactivated
-            active = item.is_active if item.is_active?
-            active = item.active if item.active?
-            is_default = item.is_default if item.is_default? else true
-
-            if active and is_default
-                console.log string.green
-            else if active and show isnt "default"
-                console.log string.yellow
-            else if show isnt "active"
-                console.log string.grey.italic
+            # if item passes the filters, show it
+            @listRow item if passes
 
         # Dummy return
+        true
+
+    # Helper for formatting the printout of a listed row
+    listRow: (item) ->
+        string = "#{item.id}: " + @formatName item.name
+
+        if item.active
+            console.log string.green
+        else
+            console.log string.grey.italic
         true
 
     # Find a resource by fuzzy searching the name
@@ -155,14 +187,18 @@ class Resource
         # Search resources if we don't have a direct ID
         else
             matches = []
+            filter =
+                type: "fuzzy"
+                field: "name"
+                value: query
 
             # Do some fuzzy matching
-            for resource in @data.items
-                name = @formatName resource[@name]
-                match = fuzzy name, query
-                match.id = resource[@name].id
-                minScore = config.score or 1.5
-                matches.push match if match.score >= query.length * minScore
+            for item in @data.items
+                match = @filterRowFuzzy item[@name], filter, true
+
+                if match
+                    match.id = item[@name].id
+                    matches.push match
 
             # Sort matches in descending order
             matches.sort fuzzy.matchComparator
@@ -280,7 +316,3 @@ class Resource
         console.log "#{alias}: #{id}" for alias, id of @data.aliases
         console.log ""
         true
-
-# Our export
-modules.export = Resource
-
