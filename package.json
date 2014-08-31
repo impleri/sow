@@ -28,11 +28,12 @@
     },
     "scripts": {
         "prepublish": "node setup.js prepublish",
-        "test": "node setup.js test"
+        "test": "node setup.js test",
+        "postinstall": "node setup.js postinstall"
     },
     "dependencies": {
         "coffee-script": "~1.6",
-        "harvest": "impleri/node-harvest",
+        "harvest": "~0.0",
         "commander": "~2.0",
         "oauth": "~0.9",
         "loggy": "~0.2",
