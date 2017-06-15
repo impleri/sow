@@ -71,6 +71,8 @@ syncParsing = ->
 
 # Sorts tasks by client and project
 insertEntry = (entry) ->
+    return if entry.hours == 0 && config.skipEmpty
+
     client = entry.client
     project = entry.project
     task = entry.task
