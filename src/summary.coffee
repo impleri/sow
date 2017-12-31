@@ -92,14 +92,21 @@ insertEntry = (entry) ->
     entries[client].projects[project].tasks[task].total += time
     entries[client].projects[project].tasks[task].notes[note].total += time
 
+# Filters out all entries that has 0 hours if the skipEmpty config is set
+filterEntries = (entries) ->
+    entries.filter (entry) -> !(config.skipEmpty && entry.hours == 0)
 
 # Callback to parse data from Harvest and synchronise multiple callouts
 parseData = (err, tasks) ->
     logger.error err if err?
-    if tasks.day_entries
-        for task in tasks.day_entries
-            insertEntry task
-    syncParsing()
+    
+    if !config.outputJson
+        if tasks.day_entries
+            for task in tasks.day_entries
+                insertEntry task
+        syncParsing()
+    else if tasks.day_entries
+        console.log(JSON.stringify filterEntries tasks.day_entries)
 
 
 # Dummy callback to prevent duplicating parsing
