@@ -242,3 +242,4 @@ assumptions without needing to alter the core files.
  4. debug: Show additional debug messages. Default is false.
  5. debugHarvest: Enable debugging for the Harvest API module. Default is false.
  6. skipEmpty: Removes entries with total time 0 from the output. Default is false.
+ 7. outputJson: Returns a json array instead of the default format. Default is false.
