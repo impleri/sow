@@ -42,7 +42,7 @@
         "chrono-node": "~0.1",
         "archy": "~0.0",
         "mkdirp": "~0.3",
-        "fuzzy.js": "~0.0"
+        "fuzzy.js": "~0.1.0"
     },
     "devDependencies": {
         "mocha": "~1.14",
