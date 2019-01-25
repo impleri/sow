@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "coffee-script": "~1.6",
-        "harvest": "~0.0",
+        "harvest": "~0.2.0",
         "commander": "~2.0",
         "oauth": "~0.9",
         "loggy": "~0.2",
