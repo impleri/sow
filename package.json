@@ -38,7 +38,7 @@
         "oauth": "~0.9",
         "loggy": "~0.2",
         "colors": "~0.6",
-        "prompt": "~0.2",
+        "prompt": "~0.3.0",
         "chrono-node": "~0.1",
         "archy": "~0.0",
         "mkdirp": "~0.3",
