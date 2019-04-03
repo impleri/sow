@@ -34,7 +34,7 @@
     "dependencies": {
         "coffee-script": "~1.6",
         "harvest": "~0.0",
-        "commander": "~2.0",
+        "commander": "~2.20.0",
         "oauth": "~0.9",
         "loggy": "~0.2",
         "colors": "~0.6",
