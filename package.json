@@ -37,7 +37,7 @@
         "commander": "~2.0",
         "oauth": "~0.9",
         "loggy": "~0.2",
-        "colors": "~0.6",
+        "colors": "~1.4.0",
         "prompt": "~0.2",
         "chrono-node": "~0.1",
         "archy": "~0.0",
